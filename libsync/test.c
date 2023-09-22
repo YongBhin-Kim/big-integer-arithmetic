@@ -28,6 +28,13 @@ int main() {
     // test : print binary 
     bi_show_bin(z);
 
+    // test : isone, iszero
+    bi_set_zero(&x);
+    printf("%d\n", (bi_is_zero(&x) == TRUE));
+    bi_set_one(&x);
+    printf("%d\n", (bi_is_one(&x) == TRUE));
+
+    
 
     return 0;
 }
