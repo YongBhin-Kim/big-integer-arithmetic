@@ -87,7 +87,19 @@ void bi_set_by_array(bigint **const x, const int sign, const word *a, const size
     array_copy((*x)->a, a, wordlen);
 }
 
-int bi_set_by_string(bigint **const x, const int sign, const char *str, const int base);
+int bi_set_by_string(bigint **const x, const int sign, const char *str, const int base) {
+
+    int ret = FAIL;
+    // 2진수
+
+    // 16진수
+
+    // 10진수
+
+    return ret;
+
+    
+}
 
 void bi_refine(bigint *x) {
 
@@ -134,14 +146,60 @@ void bi_gen_rand(bigint **const x, const int sign, const size_t wordlen) {
 
 void bi_set_one(bigint **const x) {
 
+    if ( *x != NULL ) {
+        bi_delete(x);
+    }
+
     bi_new(x, 1);
     (*x)->sign = NON_NEGATIVE;
     (*x)->a[0] = 0x1;
 }
 
 void bi_set_zero(bigint **const x) {
+
+    if ( *x != NULL ) {
+        bi_delete(x);
+    }
  
     bi_new(x, 1);
     (*x)->sign = NON_NEGATIVE;
     (*x)->a[0] = 0x0;
+}
+
+int bi_is_zero(bigint **const x) {
+
+    size_t j;
+    int ret = FALSE;
+
+    if ( ((*x)->sign == NEGATIVE) || ((*x)->a[0] != 0) ) {
+        return ret;
+    }
+
+    for ( j=(*x)->wordlen; j>=1; j-- ) {
+        if ( (*x)->a[j] != 0 ) {
+            return ret;
+        }
+    }
+
+    ret *= (-1);
+    return ret;
+}
+
+int bi_is_one(bigint **const x) {
+
+    size_t j;
+    int ret = FALSE;
+
+    if ( ((*x)->sign == NEGATIVE) || ((*x)->a[0] != 1) ) {
+        return ret;
+    }
+
+    for ( j=(*x)->wordlen; j>=1; j-- ) {
+        if ( (*x)->a[j] != 0 ) {
+            return ret;
+        }
+    }
+
+    ret *= (-1);
+    return ret;
 }

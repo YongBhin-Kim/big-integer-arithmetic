@@ -7,6 +7,10 @@
 #define NEGATIVE 1
 #define ZERORIZE
 
+#define FAIL  -303 // SUCCESS = 303
+#define TRUE  127
+#define FALSE -127
+
 /**
  * @brief Structure of big integer
  */
@@ -22,12 +26,14 @@ void bi_show_hex(const bigint *x);
 // void bi_show_dec(const bigint *x);
 void bi_show_bin(const bigint *x);
 void bi_set_by_array(bigint **const x, const int sign, const word *a, const size_t wordlen);
-// int bi_set_by_string(bigint **const x, const int sign, const char *str, const int base);
+int bi_set_by_string(bigint **const x, const int sign, const char *str, const int base);
 void bi_refine(bigint *x);
 void bi_assign(bigint **const y, const bigint *x);
 void bi_gen_rand(bigint **const x, const int sign, const size_t wordlen);
 void bi_set_one(bigint **const x);
 void bi_set_zero(bigint **const x);
+int bi_is_zero(bigint **const x);
+int bi_is_one(bigint **const x);
 // void bi_add(bigint *z, bigint *x, bigint *y);
 // void bi_add(bigint *z, bigint *x);
 // void bi_sub(bigint *z, bigint *x, bigint *y);
