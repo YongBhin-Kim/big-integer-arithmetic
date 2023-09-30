@@ -56,7 +56,7 @@ void array_new_rand(word **const a, const size_t wordlen) {
         *a = NULL;
     }
 
-    (*a) = (word *)calloc(wordlen, sizeof(word)); // [word] [word] .. : wordlen개
+    (*a) = (word *)calloc(wordlen, sizeof(word)); // [word_n-1] [word_n-2] .. [word_0]: wordlen개
 
     byte *p = (byte *)(*a);
     int cnt = wordlen * sizeof(word);
