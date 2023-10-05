@@ -1,6 +1,7 @@
 # big-integer-arithmetic
 Implementation of the libsync Team's Big Number Library (Advanced Application Programming)
 
+
 **array**
 - void array_init(word *a, const size_t wordlen);
 - void array_copy(word *dst, const word *src, const size_t wordlen);
