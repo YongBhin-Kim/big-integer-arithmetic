@@ -73,6 +73,13 @@ int main() {
     bi_shift_left(&z, 200);
     printf(" <<= 200 = "); bi_show_hex(z);
 
+    printf("----------\n");
+
+    // test : bi_reduction (yb)
+    printf("z = "); bi_show_hex(z);
+    if ( bi_reduction(&z, 400) == 1 ) {
+        printf(" mod 2^400 = "); bi_show_hex(z);
+    }
 
     printf("----------\n");
 
