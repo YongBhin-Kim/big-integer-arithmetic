@@ -38,6 +38,7 @@ int bi_compare(bigint **const x, bigint **const y);
 int bi_compare_abs(bigint **const x, bigint **const y);
 int bi_shift_left(bigint **const x, size_t r);
 int bi_shift_right(bigint **const x, int r);
+int bi_reduction(bigint **const x, size_t r);
 
 // void bi_add(bigint *z, bigint *x, bigint *y);
 // void bi_add(bigint *z, bigint *x);
