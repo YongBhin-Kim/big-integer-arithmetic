@@ -410,3 +410,43 @@ int bi_shift_right(bigint **const x, int r) {
     // exception
     return -1;
 }
+
+// bigint, reduction bits
+int bi_reduction(bigint **const x, size_t r) {
+
+    size_t w, n;
+    size_t k, j;
+    int rp;
+    w = (size_t)(sizeof(word) * 8); // 32
+    n = (*x)->wordlen;
+    // treating error case 
+    if ( r < 0 ) {
+        return -1;
+    }
+    // case r >= wn
+    // A mod 2^r = A
+    if ( r >= (w*n) ) {
+        return 1;
+    }
+    // case r = wk where k < n
+    else if ( (r % w) == 0 ) {
+        k = r / w;
+        for ( j=k; j<n; j++ ) {
+            (*x)->a[j] = 0;
+        }
+        bi_refine(*x); // erase unused memory and modify wordlen of x
+        return 1;
+    }
+    // case r = wk + r' where k < n and 0 < r' < w
+    else {
+        k = r / w;
+        rp = r % w;
+        (*x)->a[k] = (((*x)->a[k] << (w - rp))) >> (w - rp);
+        for ( j=k+1; j<n; j++ ) {
+            (*x)->a[j] = 0;
+        }
+        bi_refine(*x);
+        return 1;
+    }
+    return -1;
+}
