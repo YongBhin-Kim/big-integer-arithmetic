@@ -20,8 +20,11 @@ typedef struct {
     word *a;
 } bigint;
 
+typedef bigint *pbigint;
+// void bi_delete(pbigint *x); // 23.10.6 
+
 void bi_delete(bigint **const x);
-void bi_new(bigint **const x, const size_t wordlen);
+void bi_new(bigint **const x, const size_t wordlen); 
 void bi_show_hex(const bigint *x);
 // void bi_show_dec(const bigint *x);
 void bi_show_bin(const bigint *x);
@@ -40,7 +43,41 @@ int bi_shift_left(bigint **const x, size_t r);
 int bi_shift_right(bigint **const x, int r);
 int bi_reduction(bigint **const x, size_t r);
 
-// void bi_add(bigint *z, bigint *x, bigint *y);
+
+/**
+ * @brief addition of two words which contains carry bits (zj <- xj + yj)
+ * 
+ * @param zj : 1 word integer (xj + yj + c)
+ * @param xj : 1 word integer ([0,W))
+ * @param yj : 1 word integer ([0,W))
+ * @param c : current carry bit which is computated by j-1-th word x, y and c (0 or 1)
+ * @return next carry bit (0 or 1)
+ */
+int bi_add_zj(word *zj, word xj, word yj, int c);
+
+/**
+ * @brief addition of two word arrays (z <- x + y)
+ * 
+ * @param z : (x + y)
+ * @param x : big integer (n = wordlen of x)
+ * @param y : big integer (m = wordlen of y) with n >= m always
+ * @return  SUCCESS(127) or FAIL(-127)
+ */
+int bi_add_zxy(bigint **const z, bigint *x, bigint *y);
+
+/**
+ * @brief 
+ * 
+ * @param z 
+ * @param x 
+ * @param y 
+ * @return int 
+ */
+int bi_add(bigint **const z, bigint *x, bigint *y);
+
+
+
+
 // void bi_add(bigint *z, bigint *x);
 // void bi_sub(bigint *z, bigint *x, bigint *y);
 // void bi_sub(bigint *z, bigint *x);

@@ -450,3 +450,114 @@ int bi_reduction(bigint **const x, size_t r) {
     }
     return -1;
 }
+
+// big integer addition
+
+
+// word, word, current carry
+// xj + yj + c mod W
+
+// C <- xj + yj
+// C <- C + c
+int bi_add_zj(word *zj, word xj, word yj, int c) {
+    int cp; // next carry
+
+    *zj = xj + yj; // C <- xj + yj mod W
+    cp = (*zj < xj); // is next carry exists?
+
+    *zj = *zj + c;   // C <- C + carry
+    cp = (*zj < c) + cp; // cp 
+
+    return cp;
+}
+
+// z <- x + y
+// wordlen(x) >= wordlen(y)
+int bi_add_zxy(bigint **const z, bigint *x, bigint *y) {
+    // n >= m
+    size_t n, m, j;
+    int c;
+    n = x->wordlen;
+    m = y->wordlen; // n >= m
+
+    bi_new(z, n+1);
+
+    bigint *y_expand = NULL;  // copy of y
+    if ( n == m ) {
+        bi_assign(&y_expand, y);
+    }
+    else if ( n > m ) {
+        // y_expand <- 0...0 || y, allocate new zero n-m+1-words
+        bi_new(&y_expand, n);
+        y_expand->sign = y->sign;
+        array_copy(y_expand->a, y->a, m);
+        for ( j=m; j<n; j++ ) {
+            y_expand->a[j] = 0;
+        }
+    }
+    c = 0; // set the first word carry bit zero
+    
+    for ( j=0; j<n; j++ ) {
+        // c, Cj <- bi_add_xyc(xj, yj, c);
+        c = bi_add_zj(&((*z)->a[j]), x->a[j], y_expand->a[j], c);
+    }
+
+    // last carry
+    (*z)->a[n] = c; // 1 or 0 --> wordlen is n+1 or n
+    bi_refine(*z);
+
+    if ( c == 1 ) {
+        printf("msb carry bit is 1(=%d)\n", c);
+    
+    }
+    else if ( c == 0 ) {
+        printf("msb carry bit is 0(=%d)\n", c);
+    }
+
+    return 1;
+
+}
+
+// addition of two integers
+// z <- x + y
+// input: x, y \in Z
+// output: z = x + y \in Z
+int bi_add(bigint **const z, bigint *x, bigint *y) {
+
+
+    // case x = 0
+    if ( bi_is_zero(&x) == TRUE ) {
+        bi_assign(z, y);
+        return 1;
+    }
+    // case y = 0
+    else if ( bi_is_zero(&y) == TRUE ) {
+        bi_assign(z, x);
+        return 1;
+    }
+    // case x > 0 and y < 0
+    else if ( (x->sign == NON_NEGATIVE) && (y->sign == NEGATIVE) ) {
+        // bi_sub(z, x, |y|);
+        return 1;
+    }
+    // case x < 0 and y > 0
+    else if ( (x->sign == NEGATIVE) && (y->sign == NON_NEGATIVE) ) {
+        // bi_sub(z, y, |x|);
+        return 1;
+    }
+    // case x > 0 and y > 0 or x < 0 and y < 0
+    else if ( x->wordlen >= y->wordlen ) {
+        bi_add_zxy(z, x, y);
+        return 1;
+    }
+    else {
+        bi_add_zxy(z, y, x);
+        return 1;
+    }
+    return -1;
+}
+
+// 여기부터
+int bi_sub() {
+
+}
