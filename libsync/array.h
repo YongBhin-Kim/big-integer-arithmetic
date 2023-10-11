@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stddef.h>
+// #include "config.h"
 
 typedef unsigned int word;
 typedef unsigned char byte;
