@@ -1,4 +1,4 @@
-# big-integer-arithmetic
+# BBQ; Best Biginteger Quality Attribute
 Implementation of the libsync Team's Big Number Library (Advanced Application Programming)
 
 
