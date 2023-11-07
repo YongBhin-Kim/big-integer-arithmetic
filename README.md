@@ -1,5 +1,5 @@
-# big-integer-arithmetic
-Implementation of the libsync Team's Big Number Library (Advanced Application Programming)
+# BBQ; Best Biginteger Quality Attribute
+Implementation of the libsync Team's Big integer operation Library (Advanced Application Programming)
 
 
 **array**
