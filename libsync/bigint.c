@@ -29,10 +29,11 @@ int string_is_bin(const char *str) {
 }
 
 void bi_sign_flip(bigint *x) {
-    x->sign = (x->sign == NON_NEGATIVE) ? NEGATIVE : NON_NEGATIVE;
+    // x->sign = (x->sign == NON_NEGATIVE) ? NEGATIVE : NON_NEGATIVE;
+    x->sign ^= 1;
 }
 
-void bi_delete(bigint **const x) { 
+void bi_delete(pbigint *const x) { 
 
     if ( *x == NULL ) {
         return;
@@ -47,7 +48,7 @@ void bi_delete(bigint **const x) {
     *x = NULL;
 }
 
-void bi_new(bigint **const x, const size_t wordlen) {
+void bi_new(pbigint *const x, const size_t wordlen) {
 
     if ( *x != NULL ) {
         bi_delete(x);
@@ -59,7 +60,7 @@ void bi_new(bigint **const x, const size_t wordlen) {
     (*x)->a = (word *)calloc(wordlen, sizeof(word)); // [word] [word] .. : wordlen개
 }
 
-void bi_show_hex(const bigint *x) {
+void bi_show_hex(const pbigint x) {
 
     int i;
 
@@ -85,7 +86,7 @@ void bi_show_hex(const bigint *x) {
 
 void bi_show_dec(const bigint *x);
 
-void bi_show_bin(const bigint *x) {
+void bi_show_bin(const pbigint x) {
 
     size_t i;
     int j;
@@ -149,8 +150,8 @@ int bi_set_by_string(bigint **const x, const int sign, const char *str, int base
                 value = (word)(str[pos] - '0');
 
                 (*x)->a[j / (word_bits/1)] ^= value << ((j % (word_bits/1)) * 1);
-                bi_refine(*x); // case str = '0.......'
             }
+            bi_refine(*x); // case str = '0.......'
         }
         else { // string_is_bin(str) == FALSE
             printf("Fatal error: given string is not binary value. exit from program.\n");
@@ -164,7 +165,7 @@ int bi_set_by_string(bigint **const x, const int sign, const char *str, int base
             exp = 4;
 
             (*x)->sign = sign;
-            bi_new(x, (strlen(str)-1) / (word_bits/4) + 1);
+            bi_new(x, strlen(str)/(WORD_BYTES*2) + 1);
 
             for ( pos=strlen(str)-1; pos>=0; pos-- ) {
                 j = (strlen(str) - 1) - pos;
@@ -178,8 +179,8 @@ int bi_set_by_string(bigint **const x, const int sign, const char *str, int base
                     value = (word)(str[pos] - 'A') + 10;
                 }
                 (*x)->a[j / (word_bits/4)] ^= value << ((j % (word_bits/4)) * 4);
-                bi_refine(*x); // case str = '0.......'
             }
+            bi_refine(*x); // case str = '0.......'
         }
         else { // string_is_hex() == FALSE
             printf("Fatal error: given string is not hexadecimal value. exit from program.\n");
@@ -260,7 +261,11 @@ void bi_set_zero(bigint **const x) {
     (*x)->a[0] = 0x0;
 }
 
-int bi_is_zero(const bigint **const x) {
+void bi_set_zero_not_refine(bigint **const x) {
+    memset((*x)->a, 0, WORD_BYTES * (*x)->wordlen);
+}
+
+int bi_is_zero(bigint **const x) {
 
     size_t j;
     int ret = FALSE;
@@ -279,7 +284,7 @@ int bi_is_zero(const bigint **const x) {
     return ret;
 }
 
-int bi_is_one(const bigint **const x) {
+int bi_is_one(bigint **const x) {
 
     size_t j;
     int ret = FALSE;
@@ -298,11 +303,34 @@ int bi_is_one(const bigint **const x) {
     return ret;
 }
 
+// 인턴 평가 일요일까지
+// 상.중.하
+// 1. 성실함
+// 2. 현재 능력/실력/수준
+
+
+int word_compare(word *x, word *y, size_t x_wordlen, size_t y_wordlen) {
+    int ret;
+    if ( x_wordlen > y_wordlen )
+        return 1;
+    else if ( x_wordlen < y_wordlen )
+        return -1;
+    else {
+        for ( int j=x_wordlen; j>=0; j-- ) {
+            if ( x[j] > y[j] )
+                return 1;
+            else if ( x[j] < y[j] )
+                return -1;
+        }
+        return 0;
+    }
+}
+
 // compare(x, y) =  1 (x > y)
 // compare(x, y) =  0 (x = y)
 // compare(x, y) = -1 (x < y)
 // or FAIL
-int bi_compare(const bigint **const x, const bigint **const y) {
+int bi_compare(bigint **const x, bigint **const y) {
 
     int ret;
 
@@ -592,14 +620,6 @@ int bi_add_zxy(bigint **const z, const bigint *x, const bigint *y) {
     (*z)->a[n] = c; // 1 or 0 --> wordlen is n+1 or n
     bi_refine(*z);
 
-    if ( c == 1 ) {
-        printf("msb carry bit is 1(=%d)\n", c);
-    
-    }
-    else if ( c == 0 ) {
-        printf("msb carry bit is 0(=%d)\n", c);
-    }
-
     bi_delete(&y_expand);
 
     return 1;
@@ -705,7 +725,7 @@ int bi_sub_zxy(bigint **const z, const bigint *x, const bigint *y) {
     return 1;
 }
 
-// subtraction of two integers
+// Subtraction of two integers
 // z <- x - y
 int bi_sub(bigint **const z, const bigint *x, const bigint *y) {
 
@@ -789,4 +809,106 @@ int bi_sub(bigint **const z, const bigint *x, const bigint *y) {
         // bi_delete(&y_temp);
         return SUCCESS;
     }
+
+    return FAIL;
+}
+
+// Multiplication of two integers
+// z <- x * y
+int bi_mul(pbigint *const z, const bigint *x, const bigint *y) {
+
+    // Case x or y is zero
+    if ( bi_is_zero(&x) == TRUE || bi_is_zero(&y) == TRUE ) {
+        bi_set_zero(&z);
+        return SUCCESS;
+    }
+
+    // Case x is one
+    if ( bi_is_one(&x) == TRUE ) {
+        bi_assign(&z, y); // return y
+        return SUCCESS;
+    }
+    // Case y is one
+    if ( bi_is_one(&y) == TRUE ) {
+        bi_assign(&z, x); // return x
+        return SUCCESS;
+    }
+    // Case x is minus one
+    bigint *temp = NULL;
+    bi_assign(&temp, x);
+    bi_sign_flip(temp);
+    if ( bi_is_one(&temp) == TRUE ) {
+        bi_assign(&z, y); // return -y
+        bi_sign_flip(*z);
+        bi_delete(&temp);
+        return SUCCESS;
+    }
+    // Case y is minus one
+    bi_assign(&temp, y);
+    bi_sign_flip(temp);
+    if ( bi_is_one(&temp) == TRUE ) {
+        bi_assign(&z, x); // return -x
+        bi_sign_flip(*z);
+        bi_delete(&temp);
+        return SUCCESS;
+    }
+    bi_delete(&temp);
+
+    // Case else
+    // z <- x * y
+    bi_mul_text_zxy(z, x, y);
+    (*z)->sign = x->sign ^ y->sign;
+
+    return SUCCESS;
+}
+
+// alg. 12. single word mul
+// z \in [0, W^2) : 1 word or 2 words
+int bi_mul_zj(word *zj, word xj, word yj) {
+    word a1, a0, b1, b0, t1, t0, c1, c0, t;
+
+    a1 = xj >> (WORD_BITS/2); // a1 = xj >> W/2 (line 2)
+    a0 = xj & ((word) ((1 << (WORD_BITS/2)) - 1)); // 2^{wordbits-1} - 1 (line 2)
+    b1 = yj >> (WORD_BITS/2); // (line 3)
+    b0 = yj & ((word) ((1 << (WORD_BITS/2)) - 1)); // 2^{wordbits-1} - 1 (line 3)
+
+    t1 = a1 * b0; t0 = a0 * b1; // t1 <- a1b0, t0 <- a0b1 (line 4)
+    t0 = t1 + t0; // modular addition
+    t1 = t0 < t1; // word compare
+    c1 = a1 * b1;
+    c0 = a0 * b0; // line 7
+
+    t = c0;
+    c0 = c0 + (t0 << (WORD_BITS/2));
+    zj[0] = c0;
+    zj[1] = c1 + (t1 << (WORD_BITS/2)) + (t0 >> (WORD_BITS/2)) + (c0 < t);
+
+    return SUCCESS;
+}
+
+// Textbook Multiplication core code
+// bigint z <- bigint x * bigint y
+int bi_mul_text_zxy(bigint **const z, const bigint *x, const bigint *y) {
+
+    size_t n, m, i, j;
+    n = x->wordlen;
+    m = y->wordlen;
+    bigint *c = NULL;
+    bigint *t = NULL;
+    bi_new(&c, n+m); // consider 5.1. Memory for mul
+    bi_new(&t, 2);
+
+    for ( j=0; j<n; j++ ) {
+        for ( i=0; i<m; i++ ) {
+            bi_mul_zj(t->a, x->a[j], y->a[i]); // t[0~1] <- x_j * y_i // single word multiplication
+            bi_shift_left(&t, WORD_BITS*(i+j)); // t <- t << w(i+j);
+            bi_add(z, c, t);
+            bi_assign(&c, *z);
+            bi_new(&t, 2);
+        }
+    }
+    bi_refine(*z);
+    bi_delete(&c);
+    bi_delete(&t);
+
 }
