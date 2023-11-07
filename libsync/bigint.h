@@ -24,11 +24,16 @@ typedef struct {
 typedef bigint *pbigint;
 // void bi_delete(pbigint *x); // 23.10.6 
 
-void bi_delete(bigint **const x);
-void bi_new(bigint **const x, const size_t wordlen); 
-void bi_show_hex(const bigint *x);
+
+/*************************************************************************************
+ * Big integer operation - Basic operation
+**************************************************************************************/
+
+void bi_delete(pbigint *const x);
+void bi_new(pbigint *const x, const size_t wordlen); 
+void bi_show_hex(const pbigint x);
 // void bi_show_dec(const bigint *x);
-void bi_show_bin(const bigint *x);
+void bi_show_bin(const pbigint x);
 void bi_set_by_array(bigint **const x, const int sign, const word *a, const size_t wordlen);
 int bi_set_by_string(bigint **const x, const int sign, const char *str, int base);
 void bi_refine(bigint *x);
@@ -36,21 +41,26 @@ void bi_assign(bigint **const y, const bigint *x);
 void bi_gen_rand(bigint **const x, const int sign, const size_t wordlen);
 void bi_set_one(bigint **const x);
 void bi_set_zero(bigint **const x);
-int bi_is_zero(const bigint **const x);
-int bi_is_one(const bigint **const x);
-int bi_compare(const bigint **const x, const bigint **const y);
+int bi_is_zero(bigint **const x);
+int bi_is_one(bigint **const x);
+int bi_compare(bigint **const x, bigint **const y);
 int bi_compare_abs(const bigint **const x, const bigint **const y);
 int bi_shift_left(bigint **const x, size_t r);
 int bi_shift_right(bigint **const x, int r);
 int bi_reduction(bigint **const x, size_t r);
 
 
+
+/*************************************************************************************
+ * Big integer operation - Addition 
+**************************************************************************************/
+
 /**
  * @brief addition of two words which contains carry bits (zj <- xj + yj)
  * 
- * @param zj : 1 word integer (xj + yj + c)
- * @param xj : 1 word integer ([0,W))
- * @param yj : 1 word integer ([0,W))
+ * @param zj : single word integer (xj + yj + c)
+ * @param xj : single word integer ([0,W))
+ * @param yj : single word integer ([0,W))
  * @param c : current carry bit which is computated by j-1-th word x, y and c (0 or 1)
  * @return next carry bit (0 or 1)
  */
@@ -59,9 +69,9 @@ int bi_add_zj(word *zj, word xj, word yj, int c);
 /**
  * @brief addition of two word arrays (z <- x + y)
  * 
- * @param z : big integer word array (x + y)
- * @param x : big integer word array (n = wordlen of x)
- * @param y : big integer word array (m = wordlen of y) with n >= m always
+ * @param z : multi word word array (x + y)
+ * @param x : multi word word array (n = wordlen of x)
+ * @param y : multi word word array (m = wordlen of y) with n >= m always
  * @return  SUCCESS(127) or FAIL(-127)
  */
 int bi_add_zxy(bigint **const z, const bigint *x, const bigint *y);
@@ -78,12 +88,32 @@ int bi_add(bigint **const z, const bigint *x, const bigint *y);
 
 void bi_sign_flip(bigint *x);
 
+
+/*************************************************************************************
+ * Big integer operation - Subtraction
+**************************************************************************************/
 int bi_sub_zj(word *zj, word xj, word yj, int b);
 int bi_sub_zxy(bigint **const z, const bigint *x, const bigint *y);
 int bi_sub(bigint **const z, const bigint *x, const bigint *y);
 
-// void bi_add(bigint *z, bigint *x);
-// void bi_sub(bigint *z, bigint *x, bigint *y);
-// void bi_sub(bigint *z, bigint *x);
+
+/*************************************************************************************
+ * Big integer operation - Multiplication
+**************************************************************************************/
+int word_compare(word *x, word *y, size_t x_wordlen, size_t y_wordlen);
+int bi_mul(pbigint *const z, const bigint *x, const bigint *y);
+int bi_mul_text_zxy(bigint **const z, const bigint *x, const bigint *y); // textbook mul
+int bi_mul_zj(word *zj, word xj, word yj); // single word mul
+// improved textbook mul
+
+/*************************************************************************************
+ * Big integer operation - Exponentiation
+**************************************************************************************/
+
+
+/*************************************************************************************
+ * Big integer operation - Division
+**************************************************************************************/
+
 
 #endif
