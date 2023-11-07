@@ -9,6 +9,8 @@
 
 typedef unsigned int word;
 typedef unsigned char byte;
+#define WORD_BITS (sizeof(word)*8)
+#define WORD_BYTES (sizeof(word))
 
 void array_init(word *a, const size_t wordlen);
 void array_copy(word *dst, const word *src, const size_t wordlen);
