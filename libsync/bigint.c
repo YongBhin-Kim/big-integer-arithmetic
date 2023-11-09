@@ -33,7 +33,7 @@ void bi_sign_flip(bigint *x) {
     x->sign ^= 1;
 }
 
-void bi_delete(pbigint *const x) { 
+void bi_delete(bigint **x) { 
 
     if ( *x == NULL ) {
         return;
@@ -48,7 +48,7 @@ void bi_delete(pbigint *const x) {
     *x = NULL;
 }
 
-void bi_new(pbigint *const x, const size_t wordlen) {
+void bi_new(bigint **x, const size_t wordlen) {
 
     if ( *x != NULL ) {
         bi_delete(x);
@@ -60,7 +60,7 @@ void bi_new(pbigint *const x, const size_t wordlen) {
     (*x)->a = (word *)calloc(wordlen, sizeof(word)); // [word] [word] .. : wordlen개
 }
 
-void bi_show_hex(const pbigint x) {
+void bi_show_hex(const bigint *x) {
 
     int i;
 
@@ -86,7 +86,7 @@ void bi_show_hex(const pbigint x) {
 
 void bi_show_dec(const bigint *x);
 
-void bi_show_bin(const pbigint x) {
+void bi_show_bin(const bigint *x) {
 
     size_t i;
     int j;
@@ -114,7 +114,7 @@ void bi_show_bin(const pbigint x) {
     printf("\n");
 }
 
-void bi_set_by_array(bigint **const x, const int sign, const word *a, const size_t wordlen) {
+void bi_set_by_array(bigint **x, const int sign, const word *a, const size_t wordlen) {
 
     // case address isn't allocated
     if ( a == NULL ) {
@@ -127,7 +127,15 @@ void bi_set_by_array(bigint **const x, const int sign, const word *a, const size
     array_copy((*x)->a, a, wordlen);
 }
 
-int bi_set_by_string(bigint **const x, const int sign, const char *str, int base) {
+void bi_set_min_words(bigint **x, const int sign, const size_t wordlen) {
+
+    bi_new(x, wordlen);
+    (*x)->sign = sign;
+
+    (*x)->a[wordlen-1] = 1;
+}
+
+int bi_set_by_string(bigint **x, const int sign, const char *str, int base) {
 
     int ret = FAIL;
     long long pos;
@@ -142,8 +150,8 @@ int bi_set_by_string(bigint **const x, const int sign, const char *str, int base
         if ( string_is_bin(str) == TRUE ) {
             exp = 1;
             
-            (*x)->sign = sign;
             bi_new(x, (strlen(str)-1) / word_bits + 1); 
+            (*x)->sign = sign;
 
             for ( pos=strlen(str)-1; pos>=0; pos-- ) {
                 j = (strlen(str) - 1) - pos;
@@ -164,8 +172,8 @@ int bi_set_by_string(bigint **const x, const int sign, const char *str, int base
         if ( string_is_hex(str) == TRUE ) {
             exp = 4;
 
-            (*x)->sign = sign;
             bi_new(x, strlen(str)/(WORD_BYTES*2) + 1);
+            (*x)->sign = sign;
 
             for ( pos=strlen(str)-1; pos>=0; pos-- ) {
                 j = (strlen(str) - 1) - pos;
@@ -219,7 +227,7 @@ void bi_refine(bigint *x) {
     }
 }
 
-void bi_assign(bigint **const y, const bigint *x) { // y <- x
+void bi_assign(bigint **y, const bigint *x) { // y <- x
 
     if ( *y != NULL ) {
         bi_delete(y);
@@ -230,7 +238,7 @@ void bi_assign(bigint **const y, const bigint *x) { // y <- x
     array_copy((*y)->a, x->a, x->wordlen);
 }
 
-void bi_gen_rand(bigint **const x, const int sign, const size_t wordlen) {
+void bi_gen_rand(bigint **x, const int sign, const size_t wordlen) {
 
     bi_new(x, wordlen);
     (*x)->sign = sign;
@@ -239,7 +247,7 @@ void bi_gen_rand(bigint **const x, const int sign, const size_t wordlen) {
     bi_refine(*x);
 }
 
-void bi_set_one(bigint **const x) {
+void bi_set_one(bigint **x) {
 
     if ( *x != NULL ) {
         bi_delete(x);
@@ -250,7 +258,7 @@ void bi_set_one(bigint **const x) {
     (*x)->a[0] = 0x1;
 }
 
-void bi_set_zero(bigint **const x) {
+void bi_set_zero(bigint **x) {
 
     if ( *x != NULL ) {
         bi_delete(x);
@@ -261,21 +269,21 @@ void bi_set_zero(bigint **const x) {
     (*x)->a[0] = 0x0;
 }
 
-void bi_set_zero_not_refine(bigint **const x) {
+void bi_set_zero_not_refine(bigint **x) {
     memset((*x)->a, 0, WORD_BYTES * (*x)->wordlen);
 }
 
-int bi_is_zero(bigint **const x) {
+int bi_is_zero(const bigint *x) {
 
     size_t j;
     int ret = FALSE;
 
-    if ( ((*x)->sign == NEGATIVE) || ((*x)->a[0] != 0) ) {
+    if ( (x->sign == NEGATIVE) || (x->a[0] != 0) ) {
         return ret;
     }
 
-    for ( j=(*x)->wordlen; j>=1; j-- ) {
-        if ( (*x)->a[j] != 0 ) {
+    for ( j=x->wordlen; j>=1; j-- ) {
+        if ( x->a[j] != 0 ) {
             return ret;
         }
     }
@@ -284,17 +292,17 @@ int bi_is_zero(bigint **const x) {
     return ret;
 }
 
-int bi_is_one(bigint **const x) {
+int bi_is_one(const bigint *x) {
 
     size_t j;
     int ret = FALSE;
 
-    if ( ((*x)->sign == NEGATIVE) || ((*x)->a[0] != 1) ) {
+    if ( (x->sign == NEGATIVE) || (x->a[0] != 1) ) {
         return ret;
     }
 
-    for ( j=(*x)->wordlen; j>=1; j-- ) {
-        if ( (*x)->a[j] != 0 ) {
+    for ( j=x->wordlen; j>=1; j-- ) {
+        if ( x->a[j] != 0 ) {
             return ret;
         }
     }
@@ -303,12 +311,7 @@ int bi_is_one(bigint **const x) {
     return ret;
 }
 
-// 인턴 평가 일요일까지
-// 상.중.하
-// 1. 성실함
-// 2. 현재 능력/실력/수준
-
-
+// Compare two words
 int word_compare(word *x, word *y, size_t x_wordlen, size_t y_wordlen) {
     int ret;
     if ( x_wordlen > y_wordlen )
@@ -330,7 +333,7 @@ int word_compare(word *x, word *y, size_t x_wordlen, size_t y_wordlen) {
 // compare(x, y) =  0 (x = y)
 // compare(x, y) = -1 (x < y)
 // or FAIL
-int bi_compare(bigint **const x, bigint **const y) {
+int bi_compare(const bigint *x, const bigint *y) {
 
     int ret;
 
@@ -340,19 +343,19 @@ int bi_compare(bigint **const x, bigint **const y) {
     }
 
     // x > y
-    if ( ((*x)->sign == NON_NEGATIVE) && ((*y)->sign == NEGATIVE) ) {
+    if ( (x->sign == NON_NEGATIVE) && (y->sign == NEGATIVE) ) {
         return 1;
     }
 
     // x < y
-    if ( ((*x)->sign == NEGATIVE) && ((*y)->sign == NON_NEGATIVE )) {
+    if ( (x->sign == NEGATIVE) && (y->sign == NON_NEGATIVE )) {
         return -1;
     }
 
     // (x, y > 0) or (x, y < 0)
     ret = bi_compare_abs(x, y);
 
-    if ( (*x)->sign == NON_NEGATIVE ) { // x, y > 0
+    if ( x->sign == NON_NEGATIVE ) { // x, y > 0
         return ret; // 1, 0, -1
     }
     else {
@@ -367,11 +370,11 @@ int bi_compare(bigint **const x, bigint **const y) {
 // compareabs(x, y) = -1 (x < y)
 // compareabs(x, y) =  0 (x = y)
 // or FAIL
-int bi_compare_abs(const bigint **const x, const bigint **const y) {
+int bi_compare_abs(const bigint *x, const bigint *y) {
 
     size_t x_wordlen, y_wordlen, j;
-    x_wordlen = (*x)->wordlen;
-    y_wordlen = (*y)->wordlen;
+    x_wordlen = x->wordlen;
+    y_wordlen = y->wordlen;
 
     if ( x_wordlen > y_wordlen ) { // x > y
         return 1;
@@ -383,17 +386,17 @@ int bi_compare_abs(const bigint **const x, const bigint **const y) {
     // case x_wordlen is same with y_wordlen
 
     for ( j=x_wordlen; j-->0; ) {
-        if ( (*x)->a[j] > (*y)->a[j] ) { // x > y
+        if ( x->a[j] > y->a[j] ) { // x > y
             return 1;
         }
-        else if ( (*x)->a[j] < (*y)->a[j] ) { // x < y
+        else if ( x->a[j] < y->a[j] ) { // x < y
             return -1;
         }
     }
     return 0; // x == y
 }
 
-int bi_shift_left(bigint **const x, size_t r) {
+int bi_shift_left(bigint **x, size_t r) {
 
     size_t n = (*x)->wordlen;
     size_t w = (size_t)(sizeof(word) * 8);
@@ -445,7 +448,7 @@ int bi_shift_left(bigint **const x, size_t r) {
 }
 
 // r: shift bits
-int bi_shift_right(bigint **const x, int r) {
+int bi_shift_right(bigint **x, int r) {
 
     if ( r < 0 ) {
         bi_shift_left(x, (-1)*r);
@@ -526,7 +529,7 @@ int bi_shift_right(bigint **const x, int r) {
 }
 
 // bigint, reduction bits
-int bi_reduction(bigint **const x, size_t r) {
+int bi_reduction(bigint **x, size_t r) {
 
     size_t w, n;
     size_t k, j;
@@ -587,7 +590,7 @@ int bi_add_zj(word *zj, word xj, word yj, int c) {
 
 // z <- x + y
 // wordlen(x) >= wordlen(y)
-int bi_add_zxy(bigint **const z, const bigint *x, const bigint *y) {
+int bi_add_zxy(bigint **z, const bigint *x, const bigint *y) {
     // n >= m
     size_t n, m, j;
     int c;
@@ -630,18 +633,18 @@ int bi_add_zxy(bigint **const z, const bigint *x, const bigint *y) {
 // z <- x + y
 // input: x, y \in Z
 // output: z = x + y \in Z
-int bi_add(bigint **const z, const bigint *x, const bigint *y) {
+int bi_add(bigint **z, const bigint *x, const bigint *y) {
 
     bigint *x_abs = NULL;
     bigint *y_abs = NULL;
 
     // case x = 0
-    if ( bi_is_zero(&x) == TRUE ) {
+    if ( bi_is_zero(x) == TRUE || x == NULL ) {
         bi_assign(z, y);
         return 1;
     }
     // case y = 0
-    else if ( bi_is_zero(&y) == TRUE ) {
+    else if ( bi_is_zero(y) == TRUE || y == NULL ) {
         bi_assign(z, x);
         return 1;
     }
@@ -689,7 +692,7 @@ int bi_sub_zj(word *zj, word xj, word yj, int b) {
 
 // z <- x + y
 // always x >= y > 0
-int bi_sub_zxy(bigint **const z, const bigint *x, const bigint *y) {
+int bi_sub_zxy(bigint **z, const bigint *x, const bigint *y) {
 
     // n >= m
     size_t n, m, j;
@@ -727,26 +730,24 @@ int bi_sub_zxy(bigint **const z, const bigint *x, const bigint *y) {
 
 // Subtraction of two integers
 // z <- x - y
-int bi_sub(bigint **const z, const bigint *x, const bigint *y) {
+int bi_sub(bigint **z, const bigint *x, const bigint *y) {
 
     int cmp;
     bigint *x_temp = NULL;
     bigint *y_temp = NULL;
 
     // case x is zero
-    if ( bi_is_zero(&x) == TRUE ) {
+    if ( bi_is_zero(x) == TRUE || x == NULL ) {
         bi_assign(z, y);
-        printf("sign of z = %d\n", (*z)->sign);
         bi_sign_flip(*z);
-        printf("sign of z = %d\n", (*z)->sign);
         return SUCCESS;
     }
-    else if ( bi_is_zero(&y) == TRUE ) {
+    else if ( bi_is_zero(y) == TRUE || y == NULL ) {
         bi_assign(z, x);
         return SUCCESS;
     }
 
-    cmp = bi_compare(&x, &y);
+    cmp = bi_compare(x, y);
     // x == y
     if ( cmp == 0 ) {
         bi_set_zero(z);
@@ -815,30 +816,30 @@ int bi_sub(bigint **const z, const bigint *x, const bigint *y) {
 
 // Multiplication of two integers
 // z <- x * y
-int bi_mul(pbigint *const z, const bigint *x, const bigint *y) {
+int bi_mul(bigint **z, const bigint *x, const bigint *y, const char *str) {
 
     // Case x or y is zero
-    if ( bi_is_zero(&x) == TRUE || bi_is_zero(&y) == TRUE ) {
-        bi_set_zero(&z);
+    if ( bi_is_zero(x) == TRUE || bi_is_zero(y) == TRUE ) {
+        bi_set_zero(z);
         return SUCCESS;
     }
 
     // Case x is one
-    if ( bi_is_one(&x) == TRUE ) {
-        bi_assign(&z, y); // return y
+    if ( bi_is_one(x) == TRUE ) {
+        bi_assign(z, y); // return y
         return SUCCESS;
     }
     // Case y is one
-    if ( bi_is_one(&y) == TRUE ) {
-        bi_assign(&z, x); // return x
+    if ( bi_is_one(y) == TRUE ) {
+        bi_assign(z, x); // return x
         return SUCCESS;
     }
     // Case x is minus one
     bigint *temp = NULL;
     bi_assign(&temp, x);
     bi_sign_flip(temp);
-    if ( bi_is_one(&temp) == TRUE ) {
-        bi_assign(&z, y); // return -y
+    if ( bi_is_one(temp) == TRUE ) {
+        bi_assign(z, y); // return -y
         bi_sign_flip(*z);
         bi_delete(&temp);
         return SUCCESS;
@@ -846,8 +847,8 @@ int bi_mul(pbigint *const z, const bigint *x, const bigint *y) {
     // Case y is minus one
     bi_assign(&temp, y);
     bi_sign_flip(temp);
-    if ( bi_is_one(&temp) == TRUE ) {
-        bi_assign(&z, x); // return -x
+    if ( bi_is_one(temp) == TRUE ) {
+        bi_assign(z, x); // return -x
         bi_sign_flip(*z);
         bi_delete(&temp);
         return SUCCESS;
@@ -856,9 +857,34 @@ int bi_mul(pbigint *const z, const bigint *x, const bigint *y) {
 
     // Case else
     // z <- x * y
-    bi_mul_text_zxy(z, x, y);
+
+    bigint *x_ = NULL, *y_ = NULL;
+    bi_assign(&x_, x);
+    bi_assign(&y_, y);
+    x_->sign = NON_NEGATIVE;
+    y_->sign = NON_NEGATIVE;
+
+    if ( !strcmp("Textbook", str) ) {
+        if ( bi_mul_text_zxy(z, x_, y_) == FAIL ) {
+            bi_delete(&x_);
+            bi_delete(&y_);
+            return FAIL;
+        }
+    }
+    else if ( !strcmp("Improved Text", str) ) {
+        // bi_mul_itext_zxy(z, x, y);
+    }
+    else if ( !strcmp("Karatsuba", str) ) {
+        if ( bi_mul_karatsuba_zxy(z, x_, y_, 3) == FAIL ) {
+            bi_delete(&x_);
+            bi_delete(&y_);
+            return FAIL;
+        }
+    }
     (*z)->sign = x->sign ^ y->sign;
 
+    bi_delete(&x_);
+    bi_delete(&y_);
     return SUCCESS;
 }
 
@@ -888,13 +914,17 @@ int bi_mul_zj(word *zj, word xj, word yj) {
 
 // Textbook Multiplication core code
 // bigint z <- bigint x * bigint y
-int bi_mul_text_zxy(bigint **const z, const bigint *x, const bigint *y) {
+int bi_mul_text_zxy(bigint **z, const bigint *x, const bigint *y) {
+
+    if ( x->sign == NEGATIVE || y->sign == NEGATIVE ) {
+        printf("Fatal Error: Textbook multiplication input value should be NON NEGATIVE\n");
+        return FAIL;
+    }
 
     size_t n, m, i, j;
     n = x->wordlen;
     m = y->wordlen;
-    bigint *c = NULL;
-    bigint *t = NULL;
+    bigint *c = NULL, *t = NULL;
     bi_new(&c, n+m); // consider 5.1. Memory for mul
     bi_new(&t, 2);
 
@@ -910,5 +940,108 @@ int bi_mul_text_zxy(bigint **const z, const bigint *x, const bigint *y) {
     bi_refine(*z);
     bi_delete(&c);
     bi_delete(&t);
+
+    return SUCCESS;
+}
+
+// Karatsuba Multiplication core code
+// z <- |x| * |y|
+int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t flag) {
+    
+    if ( x->sign == NEGATIVE || y->sign == NEGATIVE ) {
+        printf("Fatal Error: Karatsuba multiplication input value should be NON NEGATIVE\n");
+        return FAIL;
+    }
+
+    size_t n, m, l, lw;
+    bigint *a1 = NULL, *a0 = NULL, *b1 = NULL, *b0 = NULL, *t1 = NULL, *t0 = NULL, *c = NULL, *c_ = NULL, *s_ = NULL, *s = NULL, *s1 = NULL, *s0 = NULL;
+    bigint *modulo = NULL, *a0_ = NULL, *b0_ = NULL;
+    n = x->wordlen;
+    m = y->wordlen;
+
+    if ( flag >= MIN(n, m) ) { // flag = 2
+        return bi_mul_text_zxy(z, x, y);
+    }
+
+    // l = max(n, m) / 2, lw = bits of l-words
+    l = (size_t) ((MAX(n, m) + 1) >> 1);
+    lw = l * WORD_BITS; 
+
+    // a1 = a >> lw;
+    bi_assign(&a1, x);
+    bi_shift_right(&a1, lw);
+
+    // modulo = 2^lw
+    bi_set_min_words(&modulo, NON_NEGATIVE, l+1);
+
+    // a0 = (a mod 2^lw) or (a + 2^lw mod 2^lw)
+    bi_set_by_array(&a0, x->sign, x->a, l); // NON_NEGATIVE
+    bi_refine(a0);
+
+    // b1 = b >> lw
+    bi_assign(&b1, y);
+    bi_shift_right(&b1, lw);
+    
+    // b0 = (b mod 2^lw) or (b + 2^lw mod 2^lw)
+    // if ( y->sign == NON_NEGATIVE )
+        bi_set_by_array(&b0, y->sign, y->a, l); // NON_NEGATIVE
+    // else {
+    //     bi_set_by_array(&b0_, y->sign, y->a, l); // NEGATIVE
+    //     bi_add(&b0, b0_, modulo); // b + 2^lw
+    // }
+    
+    // t1, t0 = mul(a1, b1), mul(a0, b0)
+    bi_mul_karatsuba_zxy(&t1, a1, b1, flag);
+    bi_mul_karatsuba_zxy(&t0, a0, b0, flag);
+    
+    // c = (t1 << 2lw) + t0
+    bi_assign(&c_, t1);
+    bi_shift_left(&c_, 2*lw);
+    bi_add(&c, c_, t0);
+    bi_assign(z, c);
+    
+    // s1, s0 = sub(a0, a1), sub(b1, b0)
+    bi_sub(&s1, a0, a1);
+    bi_sub(&s0, b1, b0);
+    
+    // s = (-1)^{sign of s1 ^ sign of s2} * mul(|s1|, |s0|)
+    int sign = s1->sign ^ s0->sign;
+    bi_new(&s_, 1);
+
+    s1->sign = NON_NEGATIVE;
+    s0->sign = NON_NEGATIVE;
+    bi_mul_karatsuba_zxy(&s_, s1, s0, flag);
+    s_->sign = sign;
+
+    // s = add(s, t1), s = add(s, t0)
+    bi_add(&s, s_, t1);
+    bi_assign(&s_, s);
+    bi_add(&s, s_, t0);
+
+    // s = s << lw
+    bi_shift_left(&s, lw);
+
+    // z = add(c, s)
+    bi_add(z, c, s);
+
+    // free bigintegers
+    bi_delete(&a1);
+    bi_delete(&a0);
+    bi_delete(&b1);
+    bi_delete(&b0);
+    bi_delete(&t1);
+    bi_delete(&t0);
+    bi_delete(&c);
+    bi_delete(&c_);
+    bi_delete(&s_);
+    bi_delete(&s);
+    bi_delete(&s1);
+    bi_delete(&s0);
+
+    bi_delete(&modulo);
+    bi_delete(&a0_);
+    bi_delete(&b0_);
+
+    return SUCCESS;
 
 }
