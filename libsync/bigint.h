@@ -22,32 +22,32 @@ typedef struct {
 } bigint;
 
 typedef bigint *pbigint;
-// void bi_delete(pbigint *x); // 23.10.6 
+// void bi_delete(pbigint *x);
 
 
 /*************************************************************************************
  * Big integer operation - Basic operation
 **************************************************************************************/
 
-void bi_delete(pbigint *const x);
-void bi_new(pbigint *const x, const size_t wordlen); 
-void bi_show_hex(const pbigint x);
+void bi_delete(bigint **x);
+void bi_new(bigint **x, const size_t wordlen); 
+void bi_show_hex(const bigint *x);
 // void bi_show_dec(const bigint *x);
-void bi_show_bin(const pbigint x);
-void bi_set_by_array(bigint **const x, const int sign, const word *a, const size_t wordlen);
-int bi_set_by_string(bigint **const x, const int sign, const char *str, int base);
+void bi_show_bin(const bigint *x);
+void bi_set_by_array(bigint **x, const int sign, const word *a, const size_t wordlen);
+int bi_set_by_string(bigint **x, const int sign, const char *str, int base);
 void bi_refine(bigint *x);
-void bi_assign(bigint **const y, const bigint *x);
-void bi_gen_rand(bigint **const x, const int sign, const size_t wordlen);
-void bi_set_one(bigint **const x);
-void bi_set_zero(bigint **const x);
-int bi_is_zero(bigint **const x);
-int bi_is_one(bigint **const x);
-int bi_compare(bigint **const x, bigint **const y);
-int bi_compare_abs(const bigint **const x, const bigint **const y);
-int bi_shift_left(bigint **const x, size_t r);
-int bi_shift_right(bigint **const x, int r);
-int bi_reduction(bigint **const x, size_t r);
+void bi_assign(bigint **y, const bigint *x);
+void bi_gen_rand(bigint **x, const int sign, const size_t wordlen);
+void bi_set_one(bigint **x);
+void bi_set_zero(bigint **x);
+int bi_is_zero(const bigint *x);
+int bi_is_one(const bigint *x);
+int bi_compare(const bigint *x, const bigint *y);
+int bi_compare_abs(const bigint *x, const bigint *y);
+int bi_shift_left(bigint **x, size_t r);
+int bi_shift_right(bigint **x, int r);
+int bi_reduction(bigint **x, size_t r);
 
 
 
@@ -74,7 +74,7 @@ int bi_add_zj(word *zj, word xj, word yj, int c);
  * @param y : multi word word array (m = wordlen of y) with n >= m always
  * @return  SUCCESS(127) or FAIL(-127)
  */
-int bi_add_zxy(bigint **const z, const bigint *x, const bigint *y);
+int bi_add_zxy(bigint **z, const bigint *x, const bigint *y);
 
 /**
  * @brief addition of two big integers
@@ -84,7 +84,7 @@ int bi_add_zxy(bigint **const z, const bigint *x, const bigint *y);
  * @param y : big integer 
  * @return SUCCESS or FAIL
  */
-int bi_add(bigint **const z, const bigint *x, const bigint *y);
+int bi_add(bigint **z, const bigint *x, const bigint *y);
 
 void bi_sign_flip(bigint *x);
 
@@ -93,17 +93,19 @@ void bi_sign_flip(bigint *x);
  * Big integer operation - Subtraction
 **************************************************************************************/
 int bi_sub_zj(word *zj, word xj, word yj, int b);
-int bi_sub_zxy(bigint **const z, const bigint *x, const bigint *y);
-int bi_sub(bigint **const z, const bigint *x, const bigint *y);
+int bi_sub_zxy(bigint **z, const bigint *x, const bigint *y);
+int bi_sub(bigint **z, const bigint *x, const bigint *y);
 
 
 /*************************************************************************************
  * Big integer operation - Multiplication
 **************************************************************************************/
 int word_compare(word *x, word *y, size_t x_wordlen, size_t y_wordlen);
-int bi_mul(pbigint *const z, const bigint *x, const bigint *y);
-int bi_mul_text_zxy(bigint **const z, const bigint *x, const bigint *y); // textbook mul
-int bi_mul_zj(word *zj, word xj, word yj); // single word mul
+int bi_mul(bigint **z, const bigint *x, const bigint *y, const char *str);
+int bi_mul_zj(word *zj, word xj, word yj);                                              // Single word mul
+
+int bi_mul_text_zxy(bigint **z, const bigint *x, const bigint *y);                // Textbook mul
+int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t flag); // Karatsuba mul
 // improved textbook mul
 
 /*************************************************************************************
