@@ -1,4 +1,4 @@
-//내가 추가한 함수
+//내가 추가한 함수 -> 메모리 배열은 realloc을 이용해서 재할당 해주는 함수
 //x를 *형태로 구현해도 상관x
 int bi_realloc(bigint** const x, size_t size)
 {
