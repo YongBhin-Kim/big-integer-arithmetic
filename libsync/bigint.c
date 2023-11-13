@@ -313,7 +313,7 @@ int bi_is_one(const bigint *x) {
 
 // Compare two words
 int word_compare(word *x, word *y, size_t x_wordlen, size_t y_wordlen) {
-    int ret;
+
     if ( x_wordlen > y_wordlen )
         return 1;
     else if ( x_wordlen < y_wordlen )
@@ -974,7 +974,8 @@ int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t fl
     // modulo = 2^lw
     bi_set_min_words(&modulo, NON_NEGATIVE, l+1);
 
-    // a0 = (a mod 2^lw) or (a + 2^lw mod 2^lw)
+    // a0 = (a mod 2^lw) (a0 is always non-negative in this function.)
+    //  if a is negative, then a0 = (2^lw) + (|a| mod 2^lw) 
     bi_set_by_array(&a0, x->sign, x->a, l); // NON_NEGATIVE
     bi_refine(a0);
 
@@ -982,13 +983,8 @@ int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t fl
     bi_assign(&b1, y);
     bi_shift_right(&b1, lw);
     
-    // b0 = (b mod 2^lw) or (b + 2^lw mod 2^lw)
-    // if ( y->sign == NON_NEGATIVE )
-        bi_set_by_array(&b0, y->sign, y->a, l); // NON_NEGATIVE
-    // else {
-    //     bi_set_by_array(&b0_, y->sign, y->a, l); // NEGATIVE
-    //     bi_add(&b0, b0_, modulo); // b + 2^lw
-    // }
+    // b0 = (b mod 2^lw) 
+    bi_set_by_array(&b0, y->sign, y->a, l); 
     
     // t1, t0 = mul(a1, b1), mul(a0, b0)
     bi_mul_karatsuba_zxy(&t1, a1, b1, flag);
@@ -1044,4 +1040,34 @@ int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t fl
 
     return SUCCESS;
 
+}
+
+// Barrett Reduction
+// X is in [0, W^{2n}) 2n-word
+// N is in [W^{n-1}, W^n) fixed n-word
+// r <- x mod m
+int bi_barrett_reduction(bigint **r, const bigint *x, const bigint *m, const bigint *t) {
+
+    if ( x == NULL || m == NULL || t == NULL )
+        return FAIL;
+
+    size_t n = m->wordlen;
+    bigint *qh = NULL, *x_ = NULL, *r_;
+
+    bi_assign(&x_, x);
+    bi_shift_right(&x_, WORD_BITS * (n - 1));
+    bi_mul(&qh, x_, t, "Karatsuba");
+    bi_shift_right(&qh, WORD_BITS * (n + 1));
+    bi_mul(&r_, m, qh, "Karatsuba");
+    bi_sub(r, x, r_);
+    while ( bi_compare(*r, m) >= 0 ) {
+        bi_sub(&r_, *r, m); 
+        bi_assign(r, r_); 
+    }
+
+    bi_delete(&qh);
+    bi_delete(&x_);
+    bi_delete(&r_);
+
+    return SUCCESS;
 }
