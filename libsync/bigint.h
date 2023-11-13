@@ -106,7 +106,9 @@ int bi_mul_zj(word *zj, word xj, word yj);                                      
 
 int bi_mul_text_zxy(bigint **z, const bigint *x, const bigint *y);                // Textbook mul
 int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t flag); // Karatsuba mul
-// improved textbook mul
+
+// int bi_mul_itext_zxy(bigint** z, const bigint* x, const bigint* y); // Improved textbook mul
+// int bi_realloc(bigint** x, size_t size);
 
 /*************************************************************************************
  * Big integer operation - Exponentiation
@@ -116,6 +118,11 @@ int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t fl
 /*************************************************************************************
  * Big integer operation - Division
 **************************************************************************************/
+
+/*************************************************************************************
+ * Big integer operation - Fast Reduction
+**************************************************************************************/
+// Barrett Reduction
 
 
 #endif
