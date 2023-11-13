@@ -15,26 +15,29 @@ int bi_realloc(bigint** const x, size_t size)
 
 //improved multi version
 //z <- x * y
-//아래 parameter의 x,y의 형태를 bigint* const x, bigint* const y로 할려니까 vs code에서
-//경고가 떠서(실행은 잘됨) -> const 떼버림! -> visual studio에서는 경고 안뜸
+int bi_mul_improved_zxy(bigint** z, const bigint* x, const bigint* y) {
+    //11.13 - 수정사항에서 추가된 변수
+    bigint* new_x = NULL;
+    bi_assign(&new_x, x);
+    bigint* new_y = NULL;
+    bi_assign(&new_y, y);
 
-int bi_mul_improved_zxy(bigint** z, bigint* x, bigint* y) {
     //x,y의 wordlen이 짝수가 아니라면 -> msb에 allzero 짜리 word하나 추가 -> x,y의 wordlen을 짝수열로 맞추자!
-    if (x->wordlen % 2 != 0) {
-        size_t new_wordlen = x->wordlen + 1;
-        bi_realloc(&x, sizeof(word) * (new_wordlen));
-        x->wordlen = new_wordlen;
-        x->a[x->wordlen - 1] = 0;
+    if (new_x->wordlen % 2 != 0) {
+        size_t new_wordlen = new_x->wordlen + 1;
+        bi_realloc(&new_x, sizeof(word) * (new_wordlen));
+        new_x->wordlen = new_wordlen;
+        new_x->a[new_wordlen - 1] = 0;
     }
-    if (y->wordlen % 2 != 0) {
-        size_t new_wordlen = y->wordlen + 1;
-        bi_realloc(&y, sizeof(word) * (new_wordlen));
-        y->wordlen = new_wordlen;
-        y->a[y->wordlen - 1] = 0;
+    if (new_y->wordlen % 2 != 0) {
+        size_t new_wordlen = new_y->wordlen + 1;
+        bi_realloc(&new_y, sizeof(word) * (new_wordlen));
+        new_y->wordlen = new_wordlen;
+        new_y->a[new_wordlen - 1] = 0;
     }
 
     //loop에 필요한 변수
-    size_t n = x->wordlen / 2;
+    size_t n = new_x->wordlen / 2;
     int cnt_i, cnt_j;
 
     //연산 시작
@@ -47,7 +50,7 @@ int bi_mul_improved_zxy(bigint** z, bigint* x, bigint* y) {
     bigint* T0 = NULL;
     bi_new(&T0, 2 * n);
     bigint* T1 = NULL;
-    bi_new(&T1, 2 * n + 1);
+    bi_new(&T1, (2 * n) + 1);
 
     //Z = Z + T
     //과정에서 사용할 버퍼 변수 C 생성
@@ -59,11 +62,11 @@ int bi_mul_improved_zxy(bigint** z, bigint* x, bigint* y) {
     word T0_MV[2] = { 0, };
     word T1_MV[2] = { 0, };
 
-    for (cnt_i = 0; cnt_i < y->wordlen; cnt_i++) {
+    for (cnt_i = 0; cnt_i < new_y->wordlen; cnt_i++) {
         for (cnt_j = 0; cnt_j < n; cnt_j++) {
             //T0,T1 중간값 -> 2word 
-            bi_mul_zj(T0_MV, x->a[2 * cnt_j], y->a[cnt_i]);
-            bi_mul_zj(T1_MV, x->a[(2 * cnt_j) + 1], y->a[cnt_i]);
+            bi_mul_zj(T0_MV, new_x->a[2 * cnt_j], new_y->a[cnt_i]);
+            bi_mul_zj(T1_MV, new_x->a[(2 * cnt_j) + 1], new_y->a[cnt_i]);
 
             //T0 -> CONCAT하면서 값 생성
             T0->a[2 * cnt_j] = T0_MV[0];
@@ -73,7 +76,6 @@ int bi_mul_improved_zxy(bigint** z, bigint* x, bigint* y) {
             T1->a[(2 * cnt_j) + 1] = T1_MV[0];
             T1->a[(2 * cnt_j) + 2] = T1_MV[1];
         }
-
         //ADDC
         //T <- T0 + T1
         bi_add(&T, T0, T1);
@@ -91,6 +93,8 @@ int bi_mul_improved_zxy(bigint** z, bigint* x, bigint* y) {
 
     //메모리 누수 관리 & z refine
     bi_refine(*z);
+    bi_delete(&new_x);
+    bi_delete(&new_y);
     bi_delete(&C);
     bi_delete(&T);
     bi_delete(&T0);
