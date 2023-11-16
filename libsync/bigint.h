@@ -3,17 +3,16 @@
 
 #include "array.h"
 
-#define NON_NEGATIVE 0
-#define NEGATIVE 1
-#define ZERORIZE
+#define NON_NEGATIVE  0
+#define NEGATIVE      1
 
-#define SUCCESS 303
-#define FAIL  -303 
-#define TRUE  127
-#define FALSE -127
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Structure of big integer
+ * @brief 
+ *  Structure of big integer
  */
 typedef struct {
     int sign;
@@ -56,33 +55,36 @@ int bi_reduction(bigint **x, size_t r);
 **************************************************************************************/
 
 /**
- * @brief addition of two words which contains carry bits (zj <- xj + yj)
- * 
+ * @brief 
+ *  addition of two words which contains carry bits (zj <- xj + yj)
  * @param zj : single word integer (xj + yj + c)
  * @param xj : single word integer ([0,W))
  * @param yj : single word integer ([0,W))
- * @param c : current carry bit which is computated by j-1-th word x, y and c (0 or 1)
- * @return next carry bit (0 or 1)
+ * @param c  : current carry bit which is computated by j-1-th word x, y and c (0 or 1)
+ * @return 
+ *  next carry bit (0 or 1)
  */
 int bi_add_zj(word *zj, word xj, word yj, int c);
 
 /**
- * @brief addition of two word arrays (z <- x + y)
- * 
+ * @brief 
+ *  addition of two word arrays (z <- x + y)
  * @param z : multi word word array (x + y)
  * @param x : multi word word array (n = wordlen of x)
  * @param y : multi word word array (m = wordlen of y) with n >= m always
- * @return  SUCCESS(127) or FAIL(-127)
+ * @return 
+ *  SUCCESS(127) or FAIL(-127)
  */
 int bi_add_zxy(bigint **z, const bigint *x, const bigint *y);
 
 /**
- * @brief addition of two big integers
- * 
+ * @brief 
+ *  addition of two big integers
  * @param z : big integer (x + y)
  * @param x : big integer 
  * @param y : big integer 
- * @return SUCCESS or FAIL
+ * @return 
+ *  SUCCESS or FAIL
  */
 int bi_add(bigint **z, const bigint *x, const bigint *y);
 
@@ -95,7 +97,6 @@ void bi_sign_flip(bigint *x);
 int bi_sub_zj(word *zj, word xj, word yj, int b);
 int bi_sub_zxy(bigint **z, const bigint *x, const bigint *y);
 int bi_sub(bigint **z, const bigint *x, const bigint *y);
-
 
 /*************************************************************************************
  * Big integer operation - Multiplication
@@ -119,10 +120,29 @@ int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t fl
  * Big integer operation - Division
 **************************************************************************************/
 
+/**
+ * @brief
+ *  Long Division of two big integers
+ * @details
+ *  x = yq + r
+ * @param q : Quotient
+ * @param r : Remainder
+ * @param x : Big integer X
+ * @param y : Big integer Y
+*/
+int bi_div(bigint **q, bigint **r, const bigint *x, const bigint *y);
+
+int bi_2word_div(word *q, const bigint *x, const word *y);
+int bi_divcc(bigint **q, bigint **r, const bigint *x, const bigint *y);
+int bi_divc(bigint **q, bigint **r, const bigint *x, const bigint *y);
+
 /*************************************************************************************
  * Big integer operation - Fast Reduction
 **************************************************************************************/
 // Barrett Reduction
 
-
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* BIGINT_H */
