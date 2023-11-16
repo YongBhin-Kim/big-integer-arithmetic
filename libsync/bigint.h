@@ -104,12 +104,10 @@ int bi_sub(bigint **z, const bigint *x, const bigint *y);
 int word_compare(word *x, word *y, size_t x_wordlen, size_t y_wordlen);
 int bi_mul(bigint **z, const bigint *x, const bigint *y, const char *str);
 int bi_mul_zj(word *zj, word xj, word yj);                                              // Single word mul
-
 int bi_mul_text_zxy(bigint **z, const bigint *x, const bigint *y);                // Textbook mul
 int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t flag); // Karatsuba mul
 
-// int bi_mul_itext_zxy(bigint** z, const bigint* x, const bigint* y); // Improved textbook mul
-// int bi_realloc(bigint** x, size_t size);
+int bi_mul_itext_zxy(bigint** z, const bigint* x, const bigint* y); // Improved textbook mul
 
 /*************************************************************************************
  * Big integer operation - Exponentiation
