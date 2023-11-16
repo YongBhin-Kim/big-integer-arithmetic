@@ -1,8 +1,8 @@
 CC = gcc
-CFLAGS = -O2 -Wall
+CFLAGS = -O2 # -Wall
 LDFLAGS =
 SRCDIR  = .
-INCLUDEDIRS =  .
+INCLUDEDIRS = .
 
 SOURCES  = array.c bigint.c
 SOURCES += test.c
