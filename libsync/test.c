@@ -13,6 +13,8 @@ int main() {
     bigint *x = NULL;
     bigint *y = NULL;
     bigint *z = NULL;
+    bigint *q = NULL;
+    bigint *r = NULL;
 
     word *a = NULL;
 
@@ -87,8 +89,11 @@ int main() {
     bi_shift_right(&z, 64);
     printf(" >>= 64 = "); bi_show_hex(z);
 
-    bi_shift_right(&z, 4);
-    printf(" >>= 4 = "); bi_show_hex(z);
+
+    bi_shift_left(&z, 1);
+    printf(" <<= 1 = "); bi_show_hex(z);
+    bi_shift_right(&z, 1);
+    printf(" >>= 1 = "); bi_show_hex(z);
 
     bi_shift_right(&z, 500);
     printf(" >>= 500 = "); bi_show_hex(z);
@@ -178,10 +183,24 @@ int main() {
     printf("(Karatsuba Mul) z = x * y = "); bi_show_hex(z);
     printf("****************************************************************************************************\n");
 
+    printf("Test : long division\n");
+    printf("****************************************************************************************************\n");
+    bi_set_by_string(&x, NON_NEGATIVE, "300127af9cd1bcc189910a2c7ee16add2f168c", 16);
+    bi_set_by_string(&y, NON_NEGATIVE, "b78a0100cf62be18cc1", 16);
+    printf("x = "); bi_show_hex(x);
+    printf("y = "); bi_show_hex(y);
+    if (bi_div(&q, &r, x, y) == SUCCESS) {
+        printf("bi_div: TRUE\n");
+    }
+    printf("q = "); bi_show_hex(q);
+    printf("r = "); bi_show_hex(r);
+    printf("****************************************************************************************************\n");
 
     bi_delete(&x);
     bi_delete(&y);
     bi_delete(&z);
+    bi_delete(&q);
+    bi_delete(&r);
 
     return 0;
 } 

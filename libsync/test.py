@@ -20,3 +20,11 @@ print("%x" %(0x027eecfdd9fbb3f767eecfdd * 0x2cc00f1e3ac38f81b7e95036fd191ea134ff
 
 print("%x" %(0x0009fbb3f767eecfdd9fbb3f767eecfdd9fbb3f767eecfdd * 0x2cc00f1e3ac38f81b7e95036fd191ea134ff616d9806e10cae20e251c36cfa5be4d9f3d5a5edfed3))
 # 1bec04c6cc03c03f55f83446d7b42daebc6897e10acecea543d88bfeed4309db7519280cc37e811c8296077b434a205e71b58fee95125a863abfa7cab9927
+
+# 5. Long division
+x = 0x300127af9cd1bcc189910a2c7ee16add2f168c
+y = 0xb78a0100cf62be18cc1
+q = x // y
+r = x % y
+print("q = %x\nr = %x" %(q, r))
+print("%x" %(y * q + r))
