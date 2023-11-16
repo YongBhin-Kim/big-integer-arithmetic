@@ -1,8 +1,7 @@
 #include "array.h"
 
 void array_init(word *a, const size_t wordlen) {
-
-    if ( (wordlen == 0) || (a == NULL) ) {
+    if ((wordlen == 0) || (a == NULL)) {
         return;
     }
 
@@ -10,8 +9,7 @@ void array_init(word *a, const size_t wordlen) {
 }
 
 void array_copy(word *dst, const word *src, const size_t wordlen) {
-
-    if ( (wordlen == 0) || (src == NULL) || (dst == NULL) ) {
+    if ((wordlen == 0) || (src == NULL) || (dst == NULL)) {
         return;
     }
 
@@ -19,10 +17,9 @@ void array_copy(word *dst, const word *src, const size_t wordlen) {
 }
 
 void array_show_hex(const word *a, const size_t wordlen) {
-
-    int i;
+    int i = wordlen;
     
-    for ( i=0; i<wordlen-1; i++ ) {
+    for (; i-- > 1;) {
         printf("%08x:", a[i]);
     }
 
@@ -30,15 +27,14 @@ void array_show_hex(const word *a, const size_t wordlen) {
 }
 
 void array_rand(word *dst, const size_t wordlen) {
-
-    if ( dst == NULL ) {
+    if (dst == NULL) {
         return;
     }
 
     byte *p = (byte *)dst;
     int cnt = wordlen * sizeof(word);
 
-    while ( cnt > 0 ) {
+    while (cnt > 0) {
         *p = rand() & 0xff; // rand = DRBG
         p++;
         cnt--;
@@ -46,23 +42,24 @@ void array_rand(word *dst, const size_t wordlen) {
 }
 
 void array_new_rand(word **const a, const size_t wordlen) {
-
-    // 추가
-    if ( *a != NULL ) {
-#ifdef ZERORIZE
+    if (*a != NULL) {
+#if ZERORIZE
         array_init(*a, wordlen);
 #endif
         free(*a);
         *a = NULL;
     }
 
-    (*a) = (word *)calloc(wordlen, sizeof(word)); // [word_n-1] [word_n-2] .. [word_0]: wordlen개
+    /*
+        [word_n-1] [word_n-2] ... [word_0]: wordlen 개
+    */
+    (*a) = (word *)calloc(wordlen, sizeof(word));
 
     byte *p = (byte *)(*a);
     int cnt = wordlen * sizeof(word);
 
-    while ( cnt > 0 ) {
-        *p = rand() & 0xff; // rand = DRBG
+    while (cnt > 0) {
+        *p = rand() & 0xff;     // rand = DRBG
         p++;
         cnt--;
     }
