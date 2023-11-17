@@ -78,11 +78,12 @@ void bi_show_hex(const bigint *x) {
 
     /* print words except last word */
     for (i = x->wordlen; i-- > 1;) {
-        printf("%08x:", x->a[i]);
+        printf(HEX_FORMAT, x->a[i]);
     }
-
     /* print last word */
-    printf("%08x\n", x->a[i]);
+    printf(HEX_FORMAT, x->a[i]);
+    printf("\n");
+
 }
 
 void bi_show_dec(const bigint *x);
@@ -104,12 +105,12 @@ void bi_show_bin(const bigint *x) {
 
     for (i = x->wordlen; i-- > 1;) {
         for (j = word_bits-1; j >= 0; j--) {
-            printf("%d", (p[i] >> j) & 0x1);
+            printf(DEC_FORMAT, (p[i] >> j) & 0x1);
         }
         printf(":");
     }
     for (j = word_bits-1 ; j >= 0; j--) {
-        printf("%d", (p[i] >> j) & 0x1);
+        printf(DEC_FORMAT, (p[i] >> j) & 0x1);
     }
     printf("\n");
 }
@@ -1315,11 +1316,17 @@ int bi_div(bigint **q, bigint **r, const bigint *x, const bigint *y) {
      r <- x mod m
 */
 int bi_barrett_reduction(bigint **r, const bigint *x, const bigint *m, const bigint *t) {
+
     if (x == NULL || m == NULL || t == NULL) {
         return FAIL;
     }
 
     size_t n = m->wordlen;
+
+    if ( x->wordlen > (2*n) ) {
+        return FAIL;
+    }
+
     bigint *r_ = NULL, 
            *qh = NULL, 
            *x_ = NULL;
