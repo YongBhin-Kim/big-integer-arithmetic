@@ -33,6 +33,7 @@ void bi_new(bigint **x, const size_t wordlen);
 void bi_show_hex(const bigint *x);
 // void bi_show_dec(const bigint *x);
 void bi_show_bin(const bigint *x);
+void bi_set_min_words(bigint **x, const int sign, const size_t wordlen);
 void bi_set_by_array(bigint **x, const int sign, const word *a, const size_t wordlen);
 int bi_set_by_string(bigint **x, const int sign, const char *str, int base);
 void bi_refine(bigint *x);
@@ -138,6 +139,7 @@ int bi_divc(bigint **q, bigint **r, const bigint *x, const bigint *y);
  * Big integer operation - Fast Reduction
 **************************************************************************************/
 // Barrett Reduction
+int bi_barrett_reduction(bigint **r, const bigint *x, const bigint *m, const bigint *t);
 
 #ifdef __cplusplus
 }
