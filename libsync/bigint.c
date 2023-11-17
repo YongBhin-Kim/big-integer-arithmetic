@@ -132,6 +132,7 @@ void bi_set_min_words(bigint **x, const int sign, const size_t wordlen) {
     (*x)->a[wordlen-1] = 1;
 }
 
+
 int bi_set_by_string(bigint **x, const int sign, const char *str, int base) {
     int exp,      // 2^exp = base  1<<exp == base base>>exp = 1
         ret       = FAIL,
@@ -1319,7 +1320,7 @@ int bi_barrett_reduction(bigint **r, const bigint *x, const bigint *m, const big
     }
 
     size_t n = m->wordlen;
-    bigint *r_, 
+    bigint *r_ = NULL, 
            *qh = NULL, 
            *x_ = NULL;
 
@@ -1340,6 +1341,10 @@ int bi_barrett_reduction(bigint **r, const bigint *x, const bigint *m, const big
     bi_delete(&r_);
     return SUCCESS;
 }
+
+
+
+
 
 //내가 추가한 함수 -> 메모리 배열은 realloc을 이용해서 재할당 해주는 함수
 //x를 *형태로 구현해도 상관x
