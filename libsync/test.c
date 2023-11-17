@@ -179,10 +179,14 @@ int main() {
     printf("y = "); bi_show_hex(y);
     bi_mul(&z, x, y, "Textbook");
     printf("(Textbook Mul)  z = x * y = "); bi_show_hex(z);
+    bi_mul(&z, x, y, "Improved");
+    printf("(Improved Mul)  z = x * y = "); bi_show_hex(z);
     bi_mul(&z, x, y, "Karatsuba");
     printf("(Karatsuba Mul) z = x * y = "); bi_show_hex(z);
-    printf("****************************************************************************************************\n");
+    printf("====================================================================================================\n\n\n");
 
+    // Test : bi_div
+    printf("====================================================================================================\n");
     printf("Test : long division\n");
     printf("****************************************************************************************************\n");
     bi_set_by_string(&x, NON_NEGATIVE, "300127af9cd1bcc189910a2c7ee16add2f168c", 16);
@@ -194,13 +198,40 @@ int main() {
     }
     printf("q = "); bi_show_hex(q);
     printf("r = "); bi_show_hex(r);
+    printf("====================================================================================================\n\n\n");
+
+    // Test : bi_barrett_reduction
+    printf("====================================================================================================\n");
+    printf("Test : barrett reduction\n");
     printf("****************************************************************************************************\n");
+    printf("x = "); bi_show_hex(x);
+    printf("y = "); bi_show_hex(y);
+    size_t n = y->wordlen;
+    bigint *w = NULL, *tt = NULL;
+    bi_set_min_words(&w, NON_NEGATIVE, 2 * n + 1); // w^2n
+    bi_div(&tt, &r, w, y);
+    printf("w^2n = "); bi_show_hex(w);
+    printf("y = "); bi_show_hex(y);
+    printf("Pre-computated t = w^2n / y "); bi_show_hex(tt);
+    bi_barrett_reduction(&z, x, y, tt);
+    printf("z = x mod y = "); bi_show_hex(z);
+    printf("====================================================================================================\n\n\n");
+
+    // Test : bi_modular_exponentiation
+    printf("====================================================================================================\n");
+    printf("Test : Montgomery \n");
+    printf("****************************************************************************************************\n");
+
+    
+    printf("====================================================================================================\n\n\n");
 
     bi_delete(&x);
     bi_delete(&y);
     bi_delete(&z);
     bi_delete(&q);
     bi_delete(&r);
+    bi_delete(&w);
+    bi_delete(&tt);
 
     return 0;
 } 
