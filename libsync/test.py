@@ -28,3 +28,8 @@ q = x // y
 r = x % y
 print("q = %x\nr = %x" %(q, r))
 print("%x" %(y * q + r))
+
+# Barrett Reduction
+import math
+print("%x" % (0x01000000000000000000000000000000000000000000000000 // 0xb78a0100cf62be18cc1))
+print(0x3097c91b6cccd3197d2 == 0x300127af9cd1bcc189910a2c7ee16add2f168c % 0xb78a0100cf62be18cc1)
