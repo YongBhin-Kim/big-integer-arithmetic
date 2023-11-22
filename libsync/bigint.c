@@ -46,7 +46,15 @@ void bi_delete(bigint **x) {
     array_init((*x)->a, (*x)->wordlen);
 #endif
 
-    free((*x)->a);
+    // free((*x)->a);
+    // (*x)->a = NULL;
+    // free(*x);
+    // *x = NULL;
+
+    if ( (*x)->a != NULL ) {
+        free((*x)->a);
+        (*x)->a = NULL;
+    }
     free(*x);
     *x = NULL;
 }
@@ -59,7 +67,16 @@ void bi_new(bigint **x, const size_t wordlen) {
     (*x)          = (bigint *)malloc(sizeof(bigint));
     (*x)->sign    = NON_NEGATIVE;
     (*x)->wordlen = wordlen;
-    (*x)->a       = (word *)calloc(wordlen, sizeof(word));  // [word] [word] .. : wordlen개
+
+    (*x)->a       = NULL;
+    if ( wordlen > 0 ) {
+        (*x)->a       = (word *)malloc(wordlen * sizeof(word));  // [word] [word] .. : wordlen개
+        array_init((*x)->a, wordlen);
+    }
+    else {
+        (*x)->a = NULL;
+    }
+    
 }
 
 void bi_show_hex(const bigint *x) {
@@ -137,10 +154,14 @@ void bi_set_min_words(bigint **x, const int sign, const size_t wordlen) {
 int bi_set_by_string(bigint **x, const int sign, const char *str, int base) {
     int exp,      // 2^exp = base  1<<exp == base base>>exp = 1
         ret       = FAIL,
-        word_bits = sizeof(word) * 8;
+        word_bits = WORD_BITS;
     size_t j;
     word value;
     long long pos;
+
+    if ( (*x) != NULL ) {
+        bi_delete(x);
+    }
 
     /* 2진수 */
     if (base == 2) {
@@ -204,6 +225,7 @@ int bi_set_by_string(bigint **x, const int sign, const char *str, int base) {
 }
 
 void bi_refine(bigint *x) {
+
     if (x == NULL) {
         return;
     }
@@ -226,7 +248,8 @@ void bi_refine(bigint *x) {
 }
 
 void bi_assign(bigint **y, const bigint *x) {   // y <- x
-    if (*y != NULL) {
+
+    if ( *y != NULL ) {
         bi_delete(y);
     }
 
@@ -236,6 +259,7 @@ void bi_assign(bigint **y, const bigint *x) {   // y <- x
 }
 
 void bi_gen_rand(bigint **x, const int sign, const size_t wordlen) {
+    
     bi_new(x, wordlen);
     array_rand((*x)->a, wordlen);
     (*x)->sign = sign;
@@ -244,6 +268,7 @@ void bi_gen_rand(bigint **x, const int sign, const size_t wordlen) {
 }
 
 void bi_set_one(bigint **x) {
+
     if (*x != NULL) {
         bi_delete(x);
     }
@@ -254,6 +279,7 @@ void bi_set_one(bigint **x) {
 }
 
 void bi_set_zero(bigint **x) {
+
     if (*x != NULL) {
         bi_delete(x);
     }
@@ -264,11 +290,18 @@ void bi_set_zero(bigint **x) {
 }
 
 void bi_set_zero_not_refine(bigint **x) {
+
+    if ( *x == NULL || (*x)->a == NULL )
+        return;
     memset((*x)->a, 0, WORD_BYTES * (*x)->wordlen);
 }
 
 int bi_is_zero(const bigint *x) {
+
     int ret = FALSE;
+    if ( x == NULL || x->a == NULL) {
+        return ret;
+    }
     size_t j;
 
     if ((x->sign == NEGATIVE) || (x->a[0] != 0)) {
@@ -276,7 +309,7 @@ int bi_is_zero(const bigint *x) {
     }
 
     for (j = x->wordlen; j >= 1; j--) {
-        if (x->a[j] != 0) {
+        if (x->a[j-1] != 0) {
             return ret;
         }
     }
@@ -287,17 +320,22 @@ int bi_is_zero(const bigint *x) {
 
 int bi_is_one(const bigint *x) {
     int ret = FALSE;
+    if ( x == NULL || x->a == NULL ) {
+        return ret;
+    }
     size_t j;
 
     if ((x->sign == NEGATIVE) || (x->a[0] != 1)) {
         return ret;
     }
 
-    for (j = x->wordlen; j >= 1; j--) {
-        if (x->a[j] != 0) {
+    // x = ... || ? || ? || 1
+    for (j = x->wordlen; j >= 2; j--) {
+        if (x->a[j-1] != 0) {
             return ret;
         }
     }
+    // x = 0 || 0 || ... || 0 || 1
 
     ret *= (-1);
     return ret;
@@ -1050,7 +1088,7 @@ int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t fl
     bi_sub(&s0, b1, b0);
     
     /* s = (-1)^{sign of s1 ^ sign of s2} * mul(|s1|, |s0|) */
-    int sign = s1->sign ^ s0->sign;
+    int sign = s1->sign ^ s0->sign; 
     bi_new(&s_, 1);
 
     s1->sign = NON_NEGATIVE;
