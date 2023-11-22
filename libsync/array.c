@@ -53,10 +53,16 @@ void array_new_rand(word **const a, const size_t wordlen) {
     /*
         [word_n-1] [word_n-2] ... [word_0]: wordlen 개
     */
-    (*a) = (word *)calloc(wordlen, sizeof(word));
+    if ( wordlen > 0 ) {
+        (*a) = (word *)malloc(wordlen * sizeof(word));  
+        array_init(*a, wordlen);
+    }
+    else {
+        (*a) = NULL;
+    }
 
     byte *p = (byte *)(*a);
-    int cnt = wordlen * sizeof(word);
+    size_t cnt = wordlen * sizeof(word);
 
     while (cnt > 0) {
         *p = rand() & 0xff;     // rand = DRBG
