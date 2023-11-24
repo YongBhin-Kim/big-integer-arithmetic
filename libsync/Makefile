@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -O2 -g # -Wall
 LDFLAGS = -g
 SRCDIR  = .
-INCLUDEDIRS = .
+INCLUDEDIRS = ./include
 
 SOURCES  = array.c bigint.c
 SOURCES += test.c

@@ -86,7 +86,7 @@ void bi_show_hex(const bigint *x) {
         return;
     }
 
-    printf(" (hex) ");
+    // printf(" (hex) ");
 
     /* print sign of the bigint 'x' */
     if (x->sign == NEGATIVE) {
