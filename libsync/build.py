@@ -87,7 +87,7 @@ def ctest():
     
     try:
         subprocess.run("./test > test.py; python3 test.py", check=True, shell=True)
-        # succ += ["test.py"]
+        succ += ["test.py"]
     except subprocess.CalledProcessError:
         print("[!] build failed.")
         rm_files(succ)
