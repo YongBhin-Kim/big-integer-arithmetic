@@ -42,8 +42,6 @@ def cbuild():
         print("[!] The target to build does not exist.")
         return
     
-    print(srcs)
-    
     for path in include_path:
         includes += ["-I", path]
     

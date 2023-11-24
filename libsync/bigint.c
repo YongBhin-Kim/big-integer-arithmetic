@@ -93,6 +93,8 @@ void bi_show_hex(const bigint *x) {
         printf("-");
     }
 
+    printf("0x");
+
     /* print words except last word */
     for (i = x->wordlen; i-- > 1;) {
         printf(HEX_FORMAT, x->a[i]);
@@ -152,8 +154,7 @@ void bi_set_min_words(bigint **x, const int sign, const size_t wordlen) {
 
 
 int bi_set_by_string(bigint **x, const int sign, const char *str, int base) {
-    int exp,      // 2^exp = base  1<<exp == base base>>exp = 1
-        ret       = FAIL,
+    int ret       = FAIL,
         word_bits = WORD_BITS;
     size_t j;
     word value;
@@ -166,8 +167,6 @@ int bi_set_by_string(bigint **x, const int sign, const char *str, int base) {
     /* 2진수 */
     if (base == 2) {
         if (string_is_bin(str) == TRUE) {
-            exp = 1;
-            
             bi_new(x, (strlen(str)-1) / word_bits + 1); 
             (*x)->sign = sign;
 
@@ -190,8 +189,6 @@ int bi_set_by_string(bigint **x, const int sign, const char *str, int base) {
     /* 16진수 */
     else if (base == 16) {
         if (string_is_hex(str) == TRUE) {
-            exp = 4;
-
             bi_new(x, strlen(str)/(WORD_BYTES*2) + 1);
             (*x)->sign = sign;
 
@@ -1150,7 +1147,7 @@ int bi_2word_div(word *q, const bigint *x, const word *y) {
         return FALSE;
     }
 
-    int i, j = WORD_BITS - 1;
+    int j = WORD_BITS - 1;
     word w = 1 << j,
          r = x->a[1];
 
