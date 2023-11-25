@@ -1,6 +1,11 @@
 # BBQ; Best Biginteger Quality Attribute
 Implementation of the libsync Team's Big integer operation Library (Advanced Application Programming)
 
+**members**
+- Yongbhin Kim
+- Seunghyeon Kim
+- Kihyeon Shin
+- Eunsu Jeong
 
 **array**
 - void array_init(word *a, const size_t wordlen);
