@@ -293,20 +293,16 @@ void bi_set_zero_not_refine(bigint **x) {
     memset((*x)->a, 0, WORD_BYTES * (*x)->wordlen);
 }
 
-int bi_is_zero(const bigint *x) {
-
+int bi_is_zero(const bigint* x) {
     int ret = FALSE;
-    if ( x == NULL || x->a == NULL) {
-        return ret;
-    }
     size_t j;
 
     if ((x->sign == NEGATIVE) || (x->a[0] != 0)) {
         return ret;
     }
 
-    for (j = x->wordlen; j >= 1; j--) {
-        if (x->a[j-1] != 0) {
+    for (j = x->wordlen - 1; j >= 1; j--) {
+        if (x->a[j] != 0) {
             return ret;
         }
     }
@@ -315,28 +311,24 @@ int bi_is_zero(const bigint *x) {
     return ret;
 }
 
-int bi_is_one(const bigint *x) {
+int bi_is_one(const bigint* x) {
     int ret = FALSE;
-    if ( x == NULL || x->a == NULL ) {
-        return ret;
-    }
     size_t j;
 
     if ((x->sign == NEGATIVE) || (x->a[0] != 1)) {
         return ret;
     }
 
-    // x = ... || ? || ? || 1
-    for (j = x->wordlen; j >= 2; j--) {
-        if (x->a[j-1] != 0) {
+    for (j = x->wordlen - 1; j >= 1; j--) {
+        if (x->a[j] != 0) {
             return ret;
         }
     }
-    // x = 0 || 0 || ... || 0 || 1
 
     ret *= (-1);
     return ret;
 }
+
 
 /* Compare two words */
 int word_compare(word *x, word *y, size_t x_wordlen, size_t y_wordlen) {
@@ -1301,13 +1293,19 @@ int bi_divc(bigint **q, bigint **r, const bigint *x, const bigint *y) {
      input : Xn-1·W^{n-1} + Xn-2·W^{n-2} + ··· + X0, Ym-1·W^{m-1} + Ym-2·W^{m-2} + ··· + Y0
      output: Q, R such that X = YQ + R
 */
-int bi_div(bigint **q, bigint **r, const bigint *x, const bigint *y) {
+int bi_div(bigint** q, bigint** r, const bigint* x, const bigint* y) {
     if (x == NULL || y == NULL) {       // Check input
         return FAIL;
     }
 
-    /* 
-        X < Y, 
+    //추가된 부분 -> y는 음수나 0이 될 수 없음!
+    if (y->sign == NEGATIVE || bi_is_zero(y) == TRUE) {
+        printf("sign of y is only NON_NEGATIVE and y can not setting zero!\n");
+        return FAIL;
+    }
+
+    /*
+        X < Y,
          Q = 0
          R = X
     */
@@ -1318,7 +1316,7 @@ int bi_div(bigint **q, bigint **r, const bigint *x, const bigint *y) {
     }
 
     size_t i, n = x->wordlen;
-    bigint *_q = NULL, *_r1 = NULL, *_r2 = NULL;
+    bigint* _q = NULL, * _r1 = NULL, * _r2 = NULL;
 
     bi_new(q, x->wordlen);
     bi_set_zero(&_r1);
@@ -1326,17 +1324,44 @@ int bi_div(bigint **q, bigint **r, const bigint *x, const bigint *y) {
     for (i = n; i > 0; i--) {
         /* R1 = R0·W + Xi */
         bi_shift_left(&_r1, WORD_BITS);
-        _r1->a[0] = x->a[i-1];
+        _r1->a[0] = x->a[i - 1];
         bi_refine(_r1);
 
         bi_divc(&_q, &_r2, _r1, y);
-        
+
         bi_assign(&_r1, _r2);       // Update R0
-        (*q)->a[i-1] = _q->a[0];    // Q = Qn-1·W^{n-1} + Qn-2·W^{n-2} + ··· + Q0
+        (*q)->a[i - 1] = _q->a[0];    // Q = Qn-1·W^{n-1} + Qn-2·W^{n-2} + ··· + Q0
     }
 
-    bi_assign(r, _r1);
-    bi_refine(*q);
+
+    //결과 처리
+    
+    if (x->sign == NEGATIVE) {
+        //x가 음수라면
+        
+        //q <- -q-1 
+        bigint* buf = NULL;
+        (*q)->sign = NEGATIVE;
+        bigint* one = NULL;
+        bi_set_one(&one);
+        bi_sub(&buf, (*q), one);
+        bi_assign(q, buf);
+
+        //r <- b-r
+        bi_sub(&buf, y, _r1);
+        bi_assign(r, buf);
+
+        //memory leak
+        bi_delete(&buf);
+        bi_delete(&one);
+
+    }
+    else {
+        //x가 양수라면
+        bi_assign(r, _r1);
+        bi_refine(*q);
+    }
+   
 
     bi_delete(&_q);
     bi_delete(&_r1);
@@ -1481,6 +1506,161 @@ int bi_mul_itext_zxy(bigint** z, const bigint* x, const bigint* y) {
     bi_delete(&T);
     bi_delete(&T0);
     bi_delete(&T1);
+
+    return SUCCESS;
+}
+
+//Modular Exponential by Montgomery Ladder
+//z <- (x ^ n) mod M
+int bi_montgomery_mod_exp(bigint** z, const bigint* x, const bigint* n, const bigint* M) {
+    //아래 연산시작 전 예외처리3개 + n이 0일때 따로 처리하는 부분
+    //순서 중요!
+
+    //예외처리!
+    //n은 양의 정수여야 함! 
+    if (n->sign == NEGATIVE) {
+        printf("Please reset the sign of n!\n");
+        return FAIL;
+    }
+
+    //예외처리!
+   //M은 양수 여야 -> 음수이거나 0은 안되!
+    if (M->sign == NEGATIVE || bi_is_zero(M) == TRUE) {
+        printf("sign of M is only NON_NEGATIVE and M can not setting zero!\n");
+        return FAIL;
+    }
+       
+    //n이 0일때는 따로 처리
+    if (bi_is_zero(n) == TRUE) {
+        //M이 1이라면 결과값은 0
+        if (bi_is_one(M) == TRUE) {
+            bi_set_zero(z);
+            return SUCCESS;
+        }
+        else {//나머지의 경우는 결과값이 1
+            bi_set_one(z);
+            return SUCCESS;
+        }
+    }
+
+    //예외처리
+    //(00000..000) (......)....(.....) -> 이런식으로 n의 word 배열의 가장 큰 part에 0이 패딩되어 있는 경우는
+    //n의 제로패딩된 부분을 없애서 인자로 넣어달라고 하는 부분 
+    size_t msw_idx = n->wordlen - 1;
+    if (n->a[msw_idx] == 0) {
+        printf("please reset n!\n");
+        return FAIL;
+    }
+    
+    
+
+    
+    
+
+
+   
+
+    //---------------------Modular Exponential by montgomery ladder 시작--------------------------------
+   
+    //n의 워드배열 중 최상위 파트에서 어디서부터 1인지 찾아내는 부분
+    //즉, n->a[n->wordlen-1]부분에서 어디서부터 비트가 1로 시작하는지를 알아내야
+    //Modular Exponential by montgomery ladder 연산을 시작 할 수 있음
+    int mp = WORD_BITS - 1;//n의 워드배열 중 최상위 파트에서 최초로 1이 나타나는 인덱스
+    int i, j;
+    for (i = WORD_BITS - 1; i >= 0; i--) {
+        if (((n->a[n->wordlen - 1] >> i) & 0x01) == 0) {
+            mp--;
+        }
+        else {
+            break;
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------
+    //Modular Exponential by Montgomery Ladder 연산 시작
+
+    //T0,T1 초기화
+    bigint* T0 = NULL;
+    bigint* T1 = NULL;
+    bi_set_one(&T0);
+    bi_assign(&T1, x);
+
+    //T0,T1 중간 결과값 담아놓을 버퍼
+    //이 값을 T0,T1에 넣어서 T0,T1 계속 UPDATE
+    bigint* T = NULL;
+
+    //bi_div()의 인자에 넣어줄 Q,R -> 이 중 R만 사용해서 MOD연산 진행
+    bigint* Q = NULL;
+    bigint* R = NULL;
+
+    //n의 워드배열의 각 비트자리가 0 or 1?
+    int ni = 0;
+
+    //n->a[n->wordlen-1] 부분 처리 -> 워드배열 중 최상위 파트 처리
+    for (mp; mp >= 0; mp--) {
+        ni = (n->a[n->wordlen - 1] >> mp) & 0x01;
+        if (ni == 0) {
+            //T1 계산
+            bi_mul(&T, T0, T1, "Karatsuba");
+            bi_div(&Q, &R, T, M);
+            bi_assign(&T1, R);
+
+            //T0 계산
+            bi_mul(&T, T0, T0, "Karatsuba");//나중에 SQUARING으로 교체할 예정
+            bi_div(&Q, &R, T, M);
+            bi_assign(&T0, R);
+        }
+        else {//ni==1
+            //T0 계산
+            bi_mul(&T, T0, T1, "Karatsuba");
+            bi_div(&Q, &R, T, M);
+            bi_assign(&T0, R);
+
+            //T1 계산
+            bi_mul(&T, T1, T1, "Karatsuba");//나중에 SQUARING으로 교체할 예정
+            bi_div(&Q, &R, T, M);
+            bi_assign(&T1, R);
+        }
+    }
+
+    //n->a[n->wordlen-2] ~ n->a[0] 부분 처리
+    for (i = n->wordlen - 2; i >= 0; i--) {
+        for (j = WORD_BITS - 1; j >= 0; j--) {
+            ni = (n->a[i] >> j) & 0x01;
+            if (ni == 0) {
+                //T1 계산
+                bi_mul(&T, T0, T1, "Karatsuba");
+                bi_div(&Q, &R, T, M);
+                bi_assign(&T1, R);
+
+                //T0 계산
+                bi_mul(&T, T0, T0, "Karatsuba");//나중에 SQUARING으로 교체할 예정
+                bi_div(&Q, &R, T, M);
+                bi_assign(&T0, R);
+            }
+            else {//ni==1
+                //T0 계산
+                bi_mul(&T, T0, T1, "Karatsuba");
+                bi_div(&Q, &R, T, M);
+                bi_assign(&T0, R);
+
+                //T1 계산
+                bi_mul(&T, T1, T1, "Karatsuba");//나중에 SQUARING으로 교체할 예정
+                bi_div(&Q, &R, T, M);
+                bi_assign(&T1, R);
+            }
+        }
+    }
+
+    //결과값 처리
+    bi_assign(z, T0);
+
+    //메모리 누수 처리
+    bi_delete(&T);
+    bi_delete(&T0);
+    bi_delete(&T1);
+    bi_delete(&Q);
+    bi_delete(&R);
 
     return SUCCESS;
 }

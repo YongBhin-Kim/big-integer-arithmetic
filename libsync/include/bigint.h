@@ -111,9 +111,9 @@ int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t fl
 int bi_mul_itext_zxy(bigint** z, const bigint* x, const bigint* y); // Improved textbook mul
 
 /*************************************************************************************
- * Big integer operation - Exponentiation
+ * Big integer operation - Modular Exponentiation by Montgomery Ladder
 **************************************************************************************/
-
+int bi_montgomery_mod_exp(bigint** z, const bigint* x, const bigint* n, const bigint* M);
 
 /*************************************************************************************
  * Big integer operation - Division
