@@ -7,6 +7,9 @@ Implementation of the libsync Team's Big integer operation Library (Advanced App
 - Kihyeon Shin
 - Eunsu Jeong
 
+**notion**
+- https://www.notion.so/24838a671dfe4a84b1c2e5ef61eab504?v=672be1de821b46e59dfeca1e7ccefe42
+
 **array**
 - void array_init(word *a, const size_t wordlen);
 - void array_copy(word *dst, const word *src, const size_t wordlen);
