@@ -556,12 +556,12 @@ int bi_shift_right(bigint **x, int r) {
         printf(" k = %d, rp = %d\n", k, rp);
 #endif
         for (j = 0; j < n-k-1; j++) {
-            (*x)->a[j] = (((*x)->a[j+k+1] << (32-rp)) & 0xffffffff) | ((*x)->a[j+k] >> rp);
+            (*x)->a[j] = ((*x)->a[j+k+1] << (WORD_BITS-rp)) | ((*x)->a[j+k] >> rp);
         }
         (*x)->a[j] = ((*x)->a[j+k] >> rp);
         j++;
         for (; j < n; j++) {
-            (*x)->a[j] = 0x0000000;
+            (*x)->a[j] = 0;
         }
         bi_refine(*x);
 
@@ -956,9 +956,9 @@ int bi_mul_zj(word *zj, word xj, word yj) {
     word a1, a0, b1, b0, t1, t0, c1, c0, t;
 
     a1 = xj >> (WORD_BITS/2);       // a1 = xj >> W/2 (line 2)
-    a0 = xj & ((word) ((1 << (WORD_BITS/2)) - 1));      // 2^{wordbits-1} - 1 (line 2)
+    a0 = xj & ((word) (((word)1 << (WORD_BITS/2)) - 1));      // 2^{wordbits-1} - 1 (line 2)
     b1 = yj >> (WORD_BITS/2);       // (line 3)
-    b0 = yj & ((word) ((1 << (WORD_BITS/2)) - 1));      // 2^{wordbits-1} - 1 (line 3)
+    b0 = yj & ((word) (((word)1 << (WORD_BITS/2)) - 1));      // 2^{wordbits-1} - 1 (line 3)
 
     t1 = a1 * b0; t0 = a0 * b1;     // t1 <- a1b0, t0 <- a0b1 (line 4)
     t0 = t1 + t0;       // modular addition
@@ -1249,7 +1249,7 @@ int bi_divc(bigint **q, bigint **r, const bigint *x, const bigint *y) {
         return TRUE;
     }
 
-    word    w = 1 << (WORD_BITS - 1);
+    word    w = (word) 1 << (WORD_BITS - 1);
     size_t  m = y->wordlen;
     bigint *a = NULL, *b  = NULL;
 
@@ -1565,7 +1565,7 @@ int bi_montgomery_mod_exp(bigint** z, const bigint* x, const bigint* n, const bi
     //n의 워드배열 중 최상위 파트에서 어디서부터 1인지 찾아내는 부분
     //즉, n->a[n->wordlen-1]부분에서 어디서부터 비트가 1로 시작하는지를 알아내야
     //Modular Exponential by montgomery ladder 연산을 시작 할 수 있음
-    int mp = WORD_BITS - 1;//n의 워드배열 중 최상위 파트에서 최초로 1이 나타나는 인덱스
+    uint64_t mp = WORD_BITS - 1;//n의 워드배열 중 최상위 파트에서 최초로 1이 나타나는 인덱스
     int i, j;
     for (i = WORD_BITS - 1; i >= 0; i--) {
         if (((n->a[n->wordlen - 1] >> i) & 0x01) == 0) {
@@ -1597,7 +1597,7 @@ int bi_montgomery_mod_exp(bigint** z, const bigint* x, const bigint* n, const bi
     int ni = 0;
 
     //n->a[n->wordlen-1] 부분 처리 -> 워드배열 중 최상위 파트 처리
-    for (mp; mp >= 0; mp--) {
+    for (; mp >= 0; mp--) {
         ni = (n->a[n->wordlen - 1] >> mp) & 0x01;
         if (ni == 0) {
             //T1 계산

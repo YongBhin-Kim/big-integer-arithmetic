@@ -18,12 +18,11 @@ void array_copy(word *dst, const word *src, const size_t wordlen) {
 
 void array_show_hex(const word *a, const size_t wordlen) {
     int i = wordlen;
-    
-    for (; i-- > 1;) {
-        printf("%08x:", a[i]);
-    }
 
-    printf("%08x\n", a[i]);
+    for (; i-- > 1;)
+        printf(HEX_FORMAT, a[i]);
+    printf(HEX_FORMAT, a[i]);
+    printf("\n");
 }
 
 void array_rand(word *dst, const size_t wordlen) {
