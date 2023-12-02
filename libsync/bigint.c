@@ -1180,7 +1180,7 @@ int bi_2word_div(word *q, const bigint *x, const word *y) {
     }
 
     int j = WORD_BITS - 1;
-    word w = 1 << j,
+    word w = (word) 1 << j,
          r = x->a[1];
 
     *q = 0;
@@ -1305,6 +1305,7 @@ int bi_divc(bigint **q, bigint **r, const bigint *x, const bigint *y) {
             else {
                 return FALSE;
             }
+            break;
         }
         k++;
     }
@@ -1367,7 +1368,13 @@ int bi_div(bigint** q, bigint** r, const bigint* x, const bigint* y) {
         _r1->a[0] = x->a[i - 1];
         bi_refine(_r1);
 
-        bi_divc(&_q, &_r2, _r1, y);
+        if (bi_divc(&_q, &_r2, _r1, y) == FALSE) {
+            bi_delete(q);
+            bi_delete(&_q);
+            bi_delete(&_r1);
+            bi_delete(&_r2);
+            return FAIL;
+        }
 
         bi_assign(&_r1, _r2);       // Update R0
         (*q)->a[i - 1] = _q->a[0];    // Q = Qn-1·W^{n-1} + Qn-2·W^{n-2} + ··· + Q0
