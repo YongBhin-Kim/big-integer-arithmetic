@@ -9,7 +9,6 @@
 
 #define WORD      64
 
-
 /**
  * @details 
  *  Initializes the value to zero when memory is released.

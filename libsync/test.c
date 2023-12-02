@@ -204,7 +204,13 @@ int main() {
     test_mul_textbook();
     test_mul_improved_text();
     test_mul_karatsuba();
-    test_div();
+    // test_div();
+
+    // bigint *r = NULL;
+    // get_rand_bigint(3, 1, &r);
+    // bi_show_bin(r);
+    // bi_shift_left(&r, 10);
+    // bi_show_bin(r);
 
 
     return 0;

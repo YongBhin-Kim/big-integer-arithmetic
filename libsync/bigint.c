@@ -450,41 +450,42 @@ int bi_shift_left(bigint **x, size_t r) {
 #if 0
         printf("k = %d, rp = %d\n", k, rp);
 #endif
-        word c = (word)(WORD_BITS - rp), cb = (1 << (c + 1)) - 1; 
-        bi_new(&y, n + 1);
-        y->sign = (*x)->sign;
-
-        y->a[n] = (*x)->a[n-1] >> c;
-        for (j = n - 1; j > 0; j--) {
-            y->a[j] = (((*x)->a[j]) & cb) << rp | ((*x)->a[j-1]) >> c;
-        }
-        y->a[0] = ((*x)->a[0] << rp);
-
-        bi_refine(y);
-        bi_assign(x, y);
-        bi_delete(&y);
-
-        if (k > 0) {
-            return bi_shift_left(x, k * WORD_BITS);
-        }
-
-        return 1;
-
-        // bi_new(&y, n + k + 1);
+        // word c = (word)(WORD_BITS - rp), cb = (1 << (c + 1)) - 1; 
+        // bi_new(&y, n + 1);
         // y->sign = (*x)->sign;
 
-        // j = k;
-        // y->a[j] = ((*x)->a[j-k] << (32-rp)) & 0xffffffff;
-        // j++;
-        // for ( ; j<n+k+1; j++ ) {
-        //     y->a[j] = ((((*x)->a[j-k] << rp)) & 0xffffffff) | ((*x)->a[j-k-1] >> (32-rp));
+        // y->a[n] = (*x)->a[n-1] >> c;
+        // for (j = n - 1; j > 0; j--) {
+        //     y->a[j] = (((*x)->a[j]) & cb) << rp | ((*x)->a[j-1]) >> c;
         // }
+        // y->a[0] = ((*x)->a[0] << rp);
 
-        // // x <- y
+        // bi_refine(y);
         // bi_assign(x, y);
         // bi_delete(&y);
 
+        // if (k > 0) {
+        //     return bi_shift_left(x, k * WORD_BITS);
+        // }
+
         // return 1;
+
+        bi_new(&y, n + k + 1);
+        y->sign = (*x)->sign;
+
+        j = k;
+        y->a[j] = ((*x)->a[j-k] << (WORD_BITS-rp));
+        // j++;
+        for ( ; j<n+k+1; j++ ) {
+            y->a[j] = ((((*x)->a[j-k] << rp))) | ((*x)->a[j-k-1] >> (WORD_BITS-rp));
+        }
+
+        // x <- y
+        bi_assign(x, y);
+        bi_refine(*x);
+        bi_delete(&y);
+
+        return 1;
     }
 
     return -1;
