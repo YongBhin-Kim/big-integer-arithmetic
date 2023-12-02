@@ -4,7 +4,7 @@
 
 #include "bigint.h"
 
-#define BIGINT_SIZE       4
+#define BIGINT_SIZE       7
 #define TEST_EPOCH     1000
 
 #define PRINT(x)        { printf(#x " = "); bi_show_hex(x); }
