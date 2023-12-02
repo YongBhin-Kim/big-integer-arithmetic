@@ -4,7 +4,7 @@
 
 #include "bigint.h"
 
-#define BIGINT_SIZE       7
+#define BIGINT_SIZE       4
 #define TEST_EPOCH     1000
 
 #define PRINT(x)        { printf(#x " = "); bi_show_hex(x); }
@@ -18,10 +18,10 @@ long get_ms() {
 }
 
 void get_rand_bytes(unsigned char *arr, const size_t len) {
-    int i;
+    int i, x;
 
     for (i = 0; i < len; i++) {
-        arr[i] = rand() % 0xff;     // replace rand() with "kisa-ariacbc" drbg
+        arr[i] = (rand() % 0xfe) + 1;     // replace rand() with "kisa-ariacbc" drbg
     }
 }
 
@@ -230,16 +230,7 @@ int main() {
     test_mul_improved_text();
     test_mul_karatsuba();
     test_left();
-    // test_div();
-
-    // bigint *r = NULL;
-    // get_rand_bigint(2, 1, &r);
-    // r->a[0] = 0xffffffff;
-    // r->a[1] = 0xffffffff;
-    // bi_show_bin(r);
-    // bi_shift_left(&r, 1);
-    // bi_show_bin(r);
-
+    test_div();
 
     return 0;
 } 
