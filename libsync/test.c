@@ -9,8 +9,7 @@
 
 #define PRINT(x)        { printf(#x " = "); bi_show_hex(x); }
 #define START_PYTHON(x) { printf("print("");print(\"%s\")\n", (x)); printf("ret = 0\n"); }
-#define END_PYTHON(x)   { printf("if ret == %d:\n\tprint(\"SUCCESS.\")\nprint(\"%s\")\n", TEST_EPOCH, (x)); }
-
+#define END_PYTHON(x)   { printf("if ret == %d:\n\tprint(\"SUCCESS.\")\nprint(\"%s\")\nprint(ret)\n", TEST_EPOCH, (x)); }
 
 long get_ms() {
     struct timespec t_val;
@@ -168,10 +167,36 @@ void test_mul_karatsuba() {
         PRINT(y);
         PRINT(z);
         printf("if x * y == z:\n\tret = ret + 1\n");
+        printf("else:\n\tprint(x);print(y);print(z)\n");
     }
     END_PYTHON("");
 
     free_bigint(3, &z, &x, &y);
+}
+
+void test_left() {
+    int i;
+    size_t a;
+    bigint *r = NULL, *p = NULL;
+
+    START_PYTHON("bi_left()...");
+    for (i = 0; i < TEST_EPOCH; i++) {
+        a = rand()%WORD_BITS;
+
+
+        get_rand_bigint(BIGINT_SIZE, 1, &r);
+        bi_assign(&p, r);
+
+        bi_shift_left(&r, a);
+
+        PRINT(p);
+        PRINT(r);
+        printf("if p << %d == r:\n\tret = ret + 1\n", a);
+
+    }
+    END_PYTHON("");
+    free_bigint(1, &r);
+    free_bigint(1, &p);
 }
 
 void test_div() {
@@ -204,7 +229,8 @@ int main() {
     test_mul_textbook();
     test_mul_improved_text();
     test_mul_karatsuba();
-    test_div();
+    test_left();
+    // test_div();
 
     // bigint *r = NULL;
     // get_rand_bigint(2, 1, &r);

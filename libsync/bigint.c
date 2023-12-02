@@ -420,22 +420,81 @@ int bi_compare_abs(const bigint *x, const bigint *y) {
     return 0;   // x == y
 }
 
-int bi_shift_left(bigint **x, size_t r) {
+// int bi_shift_left(bigint **x, size_t r) {
+//     size_t n = (*x)->wordlen;
+//     size_t w = (size_t)(sizeof(word) * 8);
+//     size_t k, j;
+//     int rp;
+//     bigint *y = NULL;
+
+//     // case r == wk
+//     // x <- x << r (= x << wk)
+//     if ( r%w == 0 ) {
+//         k = r/w; 
+
+//         // y <- x, new allocate k-words
+//         bi_new(&y, n + k);
+//         y->sign = (*x)->sign;
+//         array_copy(y->a+k, (*x)->a, (*x)->wordlen);
+
+//         // x <- y
+//         bi_assign(x, y);
+//         bi_delete(&y);
+
+//         return 1;
+//     }
+//     // case r = wk + r' where 0 < r' < w
+//     else {
+//         k = r/w;
+//         rp = r%w;
+// #if 0
+//         printf("k = %d, rp = %d\n", k, rp);
+// #endif
+
+//         bi_new(&y, n + k + 1);
+//         y->sign = (*x)->sign;
+
+//         j = k;
+//         y->a[j] = ((*x)->a[j-k] << (rp)) & WORD_MASK;
+//         j++;
+//         for ( ; j<n+k+1; j++ ) {
+//             y->a[j] = ((((*x)->a[j-k] << rp) & WORD_MASK)) | ((*x)->a[j-k-1] >> (WORD_BITS-rp));
+//         }
+//         // j = k;
+//         // // 부호 확장
+//         // y->a[j] = (((*x)->a[j - k] << rp) & WORD_MASK) | (((*x)->a[j - k] & MSB_MASK) ? MSB_MASK << (WORD_BITS - rp) : 0);
+//         // j++;
+//         // for (; j < n + k + 1; j++) {
+//         //     y->a[j] = ((((*x)->a[j - k] << rp) & WORD_MASK)) | ((*x)->a[j - k - 1] >> (WORD_BITS - rp));
+//         // }
+
+//         // x <- y
+//         bi_assign(x, y);
+//         bi_refine(*x);
+//         bi_delete(&y);
+
+//         return 1;
+//     }
+
+//     return -1;
+// }
+
+int bi_shift_left(bigint** x, size_t r) {
     size_t n = (*x)->wordlen;
     size_t w = (size_t)(sizeof(word) * 8);
     size_t k, j;
     int rp;
-    bigint *y = NULL;
+    bigint* y = NULL;
 
     // case r == wk
     // x <- x << r (= x << wk)
-    if ( r%w == 0 ) {
-        k = r/w; 
+    if (r % w == 0) {
+        k = r / w;
 
         // y <- x, new allocate k-words
         bi_new(&y, n + k);
         y->sign = (*x)->sign;
-        array_copy(y->a+k, (*x)->a, (*x)->wordlen);
+        array_copy(y->a + k, (*x)->a, (*x)->wordlen);
 
         // x <- y
         bi_assign(x, y);
@@ -445,8 +504,8 @@ int bi_shift_left(bigint **x, size_t r) {
     }
     // case r = wk + r' where 0 < r' < w
     else {
-        k = r/w;
-        rp = r%w;
+        k = r / w;
+        rp = r % w;
 #if 0
         printf("k = %d, rp = %d\n", k, rp);
 #endif
@@ -454,12 +513,13 @@ int bi_shift_left(bigint **x, size_t r) {
         bi_new(&y, n + k + 1);
         y->sign = (*x)->sign;
 
-        j = k;
-        y->a[j] = ((*x)->a[j-k] << (rp)) & WORD_MASK;
-        j++;
-        for ( ; j<n+k+1; j++ ) {
-            y->a[j] = ((((*x)->a[j-k] << rp) & WORD_MASK)) | ((*x)->a[j-k-1] >> (WORD_BITS-rp));
+       
+        y->a[k] = ((*x)->a[0] << (rp)) & WORD_MASK;
+        size_t i;
+        for (i=1; i < n; i++) {
+            y->a[i+k] = ((((*x)->a[i] << rp) & WORD_MASK)) | ((*x)->a[i - 1] >> (WORD_BITS - rp));
         }
+        y->a[n + k] = (*x)->a[n - 1] >> (WORD_BITS - rp);
 
         // x <- y
         bi_assign(x, y);
@@ -471,6 +531,7 @@ int bi_shift_left(bigint **x, size_t r) {
 
     return -1;
 }
+
 
 /* r: shift bits */
 int bi_shift_right(bigint **x, int r) {
