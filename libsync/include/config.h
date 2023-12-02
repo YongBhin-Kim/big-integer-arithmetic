@@ -8,6 +8,10 @@
 */
 
 #define WORD      64
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 
 /**
  * @details 

@@ -13,7 +13,7 @@ void array_copy(word *dst, const word *src, const size_t wordlen) {
         return;
     }
 
-    memcpy(dst, src, wordlen * sizeof(word));
+    memcpy(dst, src, wordlen * WORD_BYTES);
 }
 
 void array_show_hex(const word *a, const size_t wordlen) {
