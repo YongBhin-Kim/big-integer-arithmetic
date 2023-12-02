@@ -158,6 +158,9 @@ void test_mul_karatsuba() {
     for (i = 0; i < TEST_EPOCH; i++) {
         get_rand_bigint(BIGINT_SIZE, 2, &x, &y);
         
+        bi_refine(x);
+        bi_refine(y);
+
         bi_mul(&z, x, y, "Karatsuba");
 
         /*
@@ -181,7 +184,7 @@ void test_left() {
 
     START_PYTHON("bi_left()...");
     for (i = 0; i < TEST_EPOCH; i++) {
-        a = rand()%WORD_BITS;
+        a = rand()%2;
 
 
         get_rand_bigint(BIGINT_SIZE, 1, &r);
@@ -191,7 +194,6 @@ void test_left() {
 
         PRINT(p);
         PRINT(r);
-        printf("if p << %d == r:\n\tret = ret + 1\n", a);
 
     }
     END_PYTHON("");
@@ -207,6 +209,9 @@ void test_div() {
     for (i = 0; i < TEST_EPOCH; i++) {
         get_rand_bigint(BIGINT_SIZE, 2, &x, &y);
         
+
+        bi_refine(x);
+        bi_refine(y);
         bi_div(&q, &r, x, y);
 
         /*
@@ -229,8 +234,7 @@ int main() {
     test_mul_textbook();
     test_mul_improved_text();
     test_mul_karatsuba();
-    test_left();
-    // test_div();
+    test_div();
 
     // bigint *r = NULL;
     // get_rand_bigint(2, 1, &r);

@@ -107,7 +107,7 @@ int bi_mul(bigint **z, const bigint *x, const bigint *y, const char *str);
 int bi_mul_zj(word *zj, word xj, word yj);                                              // Single word mul
 int bi_mul_text_zxy(bigint **z, const bigint *x, const bigint *y);                // Textbook mul
 int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t flag); // Karatsuba mul
-
+// int bi_mul_karatsuba_zxy(bigint **z, bigint *x, bigint *y, size_t flag); 
 int bi_mul_itext_zxy(bigint** z, const bigint* x, const bigint* y); // Improved textbook mul
 
 /*************************************************************************************

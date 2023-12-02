@@ -146,13 +146,6 @@ void bi_set_by_array(bigint **x, const int sign, const word *a, const size_t wor
     array_copy((*x)->a, a, wordlen);
 }
 
-void bi_set_min_words(bigint **x, const int sign, const size_t wordlen) {
-    bi_new(x, wordlen);
-    (*x)->sign = sign;
-    (*x)->a[wordlen-1] = 1;
-}
-
-
 int bi_set_by_string(bigint **x, const int sign, const char *str, int base) {
     int ret       = FAIL,
         word_bits = WORD_BITS;
@@ -482,7 +475,7 @@ int bi_compare_abs(const bigint *x, const bigint *y) {
 int bi_shift_left(bigint** x, size_t r) {
     size_t n = (*x)->wordlen;
     size_t w = (size_t)(sizeof(word) * 8);
-    size_t k, j;
+    size_t k;
     int rp;
     bigint* y = NULL;
 
@@ -978,7 +971,7 @@ int bi_mul(bigint **z, const bigint *x, const bigint *y, const char *str) {
         bi_mul_itext_zxy(z, x, y);
     }
     else if (!strcmp("Karatsuba", str)) {
-        if (bi_mul_karatsuba_zxy(z, x_, y_, 1) == FAIL) {
+        if (bi_mul_karatsuba_zxy(z, x_, y_, 2) == FAIL) {
             bi_delete(&x_);
             bi_delete(&y_);
             return FAIL;
@@ -1062,6 +1055,7 @@ int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t fl
         return FAIL;
     }
 
+
     size_t l, lw, 
            n = x->wordlen, 
            m = y->wordlen;
@@ -1088,9 +1082,6 @@ int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t fl
     bi_assign(&a1, x);
     bi_shift_right(&a1, lw);
 
-    /* modulo = 2^lw */
-    bi_set_min_words(&modulo, NON_NEGATIVE, l+1);
-
     /*
         a0 = (a mod 2^lw) (a0 is always non-negative in this function.)
          if a is negative, then a0 = (2^lw) + (|a| mod 2^lw)
@@ -1106,6 +1097,10 @@ int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t fl
     bi_set_by_array(&b0, y->sign, y->a, l); 
     
     /* t1, t0 = mul(a1, b1), mul(a0, b0) */
+    bi_refine(a1);
+    bi_refine(b1);
+    bi_refine(a0);
+    bi_refine(b0);
     bi_mul_karatsuba_zxy(&t1, a1, b1, flag);
     bi_mul_karatsuba_zxy(&t0, a0, b0, flag);
     
@@ -1125,6 +1120,8 @@ int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t fl
 
     s1->sign = NON_NEGATIVE;
     s0->sign = NON_NEGATIVE;
+    bi_refine(s0);
+    bi_refine(s1);
     bi_mul_karatsuba_zxy(&s_, s1, s0, flag);
     s_->sign = sign;
 
