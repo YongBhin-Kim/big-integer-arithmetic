@@ -7,7 +7,7 @@
  *   Supports: 8bits, 16bits, 32bits(Default) and 64bits
 */
 
-#define WORD      64
+#define WORD      32
 
 /**
  * @details 
@@ -40,3 +40,5 @@
 
 
 #endif /* CONFIG_H */
+
+

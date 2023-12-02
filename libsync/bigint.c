@@ -936,7 +936,7 @@ int bi_mul(bigint **z, const bigint *x, const bigint *y, const char *str) {
         bi_mul_itext_zxy(z, x, y);
     }
     else if (!strcmp("Karatsuba", str)) {
-        if (bi_mul_karatsuba_zxy(z, x_, y_, 3) == FAIL) {
+        if (bi_mul_karatsuba_zxy(z, x_, y_, 1) == FAIL) {
             bi_delete(&x_);
             bi_delete(&y_);
             return FAIL;
