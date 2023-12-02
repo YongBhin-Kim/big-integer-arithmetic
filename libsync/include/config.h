@@ -7,7 +7,7 @@
  *   Supports: 8bits, 16bits, 32bits(Default) and 64bits
 */
 
-#define WORD      32
+#define WORD      8
 
 /**
  * @details 

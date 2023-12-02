@@ -16,21 +16,25 @@ typedef uint8_t  word;
 #define HEX_FORMAT "%02x"
 #define DEC_FORMAT "%d"
 #define WORD_MAX    UINT8_MAX
+#define WORD_MASK 0xFF
 #elif WORD == 16
 #define HEX_FORMAT "%04x"
 #define DEC_FORMAT "%d"
 #define WORD_MAX    UINT16_MAX
 typedef uint16_t word;
+#define WORD_MASK 0xFFFF
 #elif WORD == 64
 #define HEX_FORMAT "%016llx"
 #define DEC_FORMAT "%lld"
 #define WORD_MAX    UINT64_MAX
+#define WORD_MASK 0xFFFFFFFFFFFFFFFF
 typedef uint64_t word;
 #else /* Default Value = 32bits */
 #define HEX_FORMAT "%08x"
 #define DEC_FORMAT "%d"
 #define WORD_MAX    UINT32_MAX
 typedef uint32_t word;
+#define WORD_MASK 0xFFFFFFFF
 #endif
 
 

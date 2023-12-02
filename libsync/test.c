@@ -207,9 +207,11 @@ int main() {
     test_div();
 
     // bigint *r = NULL;
-    // get_rand_bigint(3, 1, &r);
+    // get_rand_bigint(2, 1, &r);
+    // r->a[0] = 0xffffffff;
+    // r->a[1] = 0xffffffff;
     // bi_show_bin(r);
-    // bi_shift_left(&r, 10);
+    // bi_shift_left(&r, 1);
     // bi_show_bin(r);
 
 
