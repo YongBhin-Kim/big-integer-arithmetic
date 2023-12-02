@@ -18,7 +18,7 @@ long get_ms() {
 }
 
 void get_rand_bytes(unsigned char *arr, const size_t len) {
-    int i, x;
+    int i;
 
     for (i = 0; i < len; i++) {
         arr[i] = (rand() % 0xfe) + 1;     // replace rand() with "kisa-ariacbc" drbg
