@@ -1187,13 +1187,13 @@ int bi_2word_div(word *q, const STRUCT_BIGINT *x, const word *y) {
 
     while (j >= 0) {
         if (r >= w) {
-            (*q) += (1 << j);
-            ( r)  = (2*r) + ((x->a[0] >> j) & 0x1) - (*y);
+            (*q) += (word)1 << j;
+            ( r)  = (r << 1) + ((x->a[0] >> j) & 0x1) - (*y);
         }
         else {
-            r = (2*r) + ((x->a[0] >> j) & 0x1);
+            r = (r << 1) + ((x->a[0] >> j) & 0x1);
             if (r >= (*y)) {
-                (*q) += (1 << j);
+                (*q) += (word)1 << j;
                 ( r) -= *y;
             }
         }
@@ -1214,7 +1214,7 @@ int bi_divcc(STRUCT_BIGINT **q, STRUCT_BIGINT **r, const STRUCT_BIGINT *x, const
     }
     
     size_t  n = x->wordlen, m = y->wordlen;
-    STRUCT_BIGINT *a = NULL, *t = NULL;
+    STRUCT_BIGINT *a = NULL, *t = NULL, *temp = NULL, *buf = NULL;
 
     bi_new(q, 1);
 
@@ -1245,6 +1245,7 @@ int bi_divcc(STRUCT_BIGINT **q, STRUCT_BIGINT **r, const STRUCT_BIGINT *x, const
     }
 
     /* R = X - YQ */
+    bi_set_one(&temp);
     bi_mul(&t, y, *q, "Karatsuba");
     bi_sub(r, x, t);
 
@@ -1254,7 +1255,8 @@ int bi_divcc(STRUCT_BIGINT **q, STRUCT_BIGINT **r, const STRUCT_BIGINT *x, const
             T = R + Y
             R = T
         */
-        (*q)->a[0]--;
+        bi_sub(&buf, *q, temp);
+        bi_assign(q, buf);
         bi_add(&t, *r, y);
         bi_assign(r, t);
     }
@@ -1289,17 +1291,18 @@ int bi_divc(STRUCT_BIGINT **q, STRUCT_BIGINT **r, const STRUCT_BIGINT *x, const 
         return TRUE;
     }
 
-    word    w = (word) 1 << (WORD_BITS - 1);
+    word    w = (word)1 << (WORD_BITS - 1), temp;
     size_t  m = y->wordlen;
-    STRUCT_BIGINT *a = NULL, *b  = NULL;
+    STRUCT_BIGINT *a = NULL, *b = NULL;
 
     /* 
         Compute k (k >= 0) such that 2^{WORD-1} <= (2^k · Ym-1) < 2^{WORD}
     */
     size_t k = 0;
     while (k < WORD_BITS) {
-        if ((y->a[m-1] << k) >= w) {
-            if ((y->a[m-1] << k) <= WORD_MAX) {
+        temp = y->a[m-1] << k;
+        if (temp >= w) {
+            if (temp <= WORD_MAX) {
                 break;
             }
             else {
@@ -1377,6 +1380,7 @@ int bi_div(STRUCT_BIGINT** q, STRUCT_BIGINT** r, const STRUCT_BIGINT* x, const S
         }
 
         bi_assign(&_r1, _r2);       // Update R0
+        bi_show_hex(_r1);
         (*q)->a[i - 1] = _q->a[0];    // Q = Qn-1·W^{n-1} + Qn-2·W^{n-2} + ··· + Q0
     }
 
@@ -1401,7 +1405,6 @@ int bi_div(STRUCT_BIGINT** q, STRUCT_BIGINT** r, const STRUCT_BIGINT* x, const S
         //memory leak
         bi_delete(&buf);
         bi_delete(&one);
-
     }
     else {
         //x가 양수라면
