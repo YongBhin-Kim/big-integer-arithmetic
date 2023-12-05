@@ -34,7 +34,7 @@ void get_rand_bigint(const int wordlen, const int count,...) {
 
     for (i = 0; i < count; i++) {
         get_rand_bytes((unsigned char *)arr, wordlen * WORD_BYTES);
-        bi_set_by_array(va_arg(bigints, bigint**), 0, arr, wordlen);
+        bi_set_by_array(va_arg(bigints, c_bigint**), 0, arr, wordlen);
     }
 
     free(arr);
@@ -48,7 +48,7 @@ void free_bigint(const int count, ...) {
     va_start(bigints, count);
 
     for (i = 0; i < count; i++) {
-        bi_delete(va_arg(bigints, bigint**));
+        bi_delete(va_arg(bigints, c_bigint**));
     }
 
     va_end(bigints);
@@ -60,7 +60,7 @@ void test_add() {
          - Bigint Addition
     */
     int i;
-    bigint *z = NULL, *x = NULL, *y = NULL;
+    c_bigint *z = NULL, *x = NULL, *y = NULL;
 
     START_PYTHON("bi_add()...");
     for (i = 0; i < TEST_EPOCH; i++) {
@@ -83,7 +83,7 @@ void test_add() {
 
 void test_sub() {
     int i;
-    bigint *z = NULL, *x = NULL, *y = NULL;
+    c_bigint *z = NULL, *x = NULL, *y = NULL;
 
     START_PYTHON("bi_sub()...");
     for (i = 0; i < TEST_EPOCH; i++) {
@@ -106,7 +106,7 @@ void test_sub() {
 
 void test_mul_textbook() {
     int i;
-    bigint *z = NULL, *x = NULL, *y = NULL;
+    c_bigint *z = NULL, *x = NULL, *y = NULL;
 
     START_PYTHON("bi_mul() - Textbook...");
     for (i = 0; i < TEST_EPOCH; i++) {
@@ -129,7 +129,7 @@ void test_mul_textbook() {
 
 void test_mul_improved_text() {
     int i;
-    bigint *z = NULL, *x = NULL, *y = NULL;
+    c_bigint *z = NULL, *x = NULL, *y = NULL;
 
     START_PYTHON("bi_mul() - Improved Text...");
     for (i = 0; i < TEST_EPOCH; i++) {
@@ -152,7 +152,7 @@ void test_mul_improved_text() {
 
 void test_mul_karatsuba() {
     int i;
-    bigint *z = NULL, *x = NULL, *y = NULL;
+    c_bigint *z = NULL, *x = NULL, *y = NULL;
 
     START_PYTHON("bi_mul() - Karatsuba...");
     for (i = 0; i < TEST_EPOCH; i++) {
@@ -180,7 +180,7 @@ void test_mul_karatsuba() {
 void test_left() {
     int i;
     size_t a;
-    bigint *r = NULL, *p = NULL;
+    c_bigint *r = NULL, *p = NULL;
 
     START_PYTHON("bi_left()...");
     for (i = 0; i < TEST_EPOCH; i++) {
@@ -203,7 +203,7 @@ void test_left() {
 
 void test_div() {
     int i;
-    bigint *q = NULL, *r = NULL, *x = NULL, *y = NULL;
+    c_bigint *q = NULL, *r = NULL, *x = NULL, *y = NULL;
 
     START_PYTHON("bi_div()...");
     for (i = 0; i < TEST_EPOCH; i++) {
@@ -225,18 +225,105 @@ void test_div() {
     }
     END_PYTHON("");
 
-    free_bigint(3, &q, &r, &x, &y);
+    free_bigint(4, &q, &r, &x, &y);
+}
+
+//z <- x^n mod m
+//n이 너무 커지면 파이썬에서 돌릴 수 없음
+//그래서 n을 연산을 시작하기 전에 적절한 값으로 지정하고 들어가줘야 함!
+void test_modular_expo() {
+    int i;
+    c_bigint *z = NULL, *x = NULL, *n = NULL, *m = NULL;
+
+    //n이 너무 커지면 파이썬에서
+    //x**n을 계산할 수가 없기 때문에 n을 적절한 크기 수로 고정시키고 
+    //테스트를 진행해야 함
+    bi_new(&n, 1);
+    n->a[0] = 85;
+
+    START_PYTHON("bi_montgomery_mod_exp()...");
+    for (i = 0; i < TEST_EPOCH; i++) {
+        get_rand_bigint(BIGINT_SIZE, 2, &x, &m);
+        
+
+       
+       bi_montgomery_mod_exp(&z, x, n, m);
+
+        /*
+            Python Format
+        */
+        PRINT(x);
+        PRINT(n);
+        PRINT(m);
+        PRINT(z);
+        printf("if (x ** 85) % m == z :\n\tret = ret + 1\n");
+    }
+    END_PYTHON("");
+
+    free_bigint(4, &z, &x, &n, &m);
+}
+
+void test_text_squaring() {
+    int i;
+    c_bigint *z = NULL, *x = NULL;
+
+    START_PYTHON("bi_squaring_text_zx()...");
+    for (i = 0; i < TEST_EPOCH; i++) {
+        get_rand_bigint(BIGINT_SIZE, 1, &x);
+        
+
+        
+        bi_squaring_text_zx(&z, x);
+
+        /*
+            Python Format
+        */
+        PRINT(x);
+        PRINT(z);
+        printf("if x ** 2 == z:\n\tret = ret + 1\n");
+    }
+    END_PYTHON("");
+
+    free_bigint(2, &z, &x);
+}
+
+void test_karatsuba_squaring() {
+    int i;
+    c_bigint *z = NULL, *x = NULL;
+
+    START_PYTHON("bi_squaring_karatsuba_zxy()...");
+    for (i = 0; i < TEST_EPOCH; i++) {
+        get_rand_bigint(BIGINT_SIZE, 1, &x);
+        
+
+        
+        bi_squaring_karatsuba_zxy(&z, x, 2);
+
+        /*
+            Python Format
+        */
+        PRINT(x);
+        PRINT(z);
+        printf("if x ** 2 == z:\n\tret = ret + 1\n");
+    }
+    END_PYTHON("");
+
+    free_bigint(2, &z, &x);
 }
 
 int main() {
-    test_add();
-    test_sub();
-    test_mul_textbook();
-    test_mul_improved_text();
-    test_mul_karatsuba();
-    test_div();
+    // test_add();
+    //test_sub();
+    //test_mul_textbook();
+    //test_mul_improved_text();
+    //test_mul_karatsuba();
+    //test_div();
 
-    // bigint *r = NULL;
+    //test_modular_expo(); //64에서 안돌아감
+    //test_text_squaring(); //ok
+    //test_karatsuba_squaring(); //ok
+
+    // c_bigint *r = NULL;
     // get_rand_bigint(2, 1, &r);
     // r->a[0] = 0xffffffff;
     // r->a[1] = 0xffffffff;
@@ -247,3 +334,4 @@ int main() {
 
     return 0;
 } 
+

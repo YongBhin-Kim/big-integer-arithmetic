@@ -32,12 +32,12 @@ int string_is_bin(const char *str) {
     return TRUE;
 }
 
-void bi_sign_flip(bigint *x) {
+void bi_sign_flip(STRUCT_BIGINT *x) {
     // x->sign = (x->sign == NON_NEGATIVE) ? NEGATIVE : NON_NEGATIVE;
     x->sign ^= 1;
 }
 
-void bi_delete(bigint **x) { 
+void bi_delete(STRUCT_BIGINT **x) { 
     if (*x == NULL) {
         return;
     }
@@ -59,12 +59,12 @@ void bi_delete(bigint **x) {
     *x = NULL;
 }
 
-void bi_new(bigint **x, const size_t wordlen) {
+void bi_new(STRUCT_BIGINT **x, const size_t wordlen) {
     if (*x != NULL) {
         bi_delete(x);
     }
 
-    (*x)          = (bigint *)malloc(sizeof(bigint));
+    (*x)          = (STRUCT_BIGINT *)malloc(sizeof(STRUCT_BIGINT));
     (*x)->sign    = NON_NEGATIVE;
     (*x)->wordlen = wordlen;
 
@@ -79,7 +79,7 @@ void bi_new(bigint **x, const size_t wordlen) {
     
 }
 
-void bi_show_hex(const bigint *x) {
+void bi_show_hex(const STRUCT_BIGINT *x) {
     int i;
 
     if (x->wordlen == 0) {
@@ -88,7 +88,7 @@ void bi_show_hex(const bigint *x) {
 
     // printf(" (hex) ");
 
-    /* print sign of the bigint 'x' */
+    /* print sign of the STRUCT_BIGINT 'x' */
     if (x->sign == NEGATIVE) {
         printf("-");
     }
@@ -105,9 +105,9 @@ void bi_show_hex(const bigint *x) {
 
 }
 
-void bi_show_dec(const bigint *x);
+void bi_show_dec(const STRUCT_BIGINT *x);
 
-void bi_show_bin(const bigint *x) {
+void bi_show_bin(const STRUCT_BIGINT *x) {
     int j;
     int word_bits = sizeof(word) * 8;
     size_t i;
@@ -134,7 +134,7 @@ void bi_show_bin(const bigint *x) {
     printf("\n");
 }
 
-void bi_set_by_array(bigint **x, const int sign, const word *a, const size_t wordlen) {
+void bi_set_by_array(STRUCT_BIGINT **x, const int sign, const word *a, const size_t wordlen) {
     /* case address isn't allocated */
     if (a == NULL) {
         return;
@@ -146,7 +146,7 @@ void bi_set_by_array(bigint **x, const int sign, const word *a, const size_t wor
     array_copy((*x)->a, a, wordlen);
 }
 
-int bi_set_by_string(bigint **x, const int sign, const char *str, int base) {
+int bi_set_by_string(STRUCT_BIGINT **x, const int sign, const char *str, int base) {
     int ret       = FAIL,
         word_bits = WORD_BITS;
     size_t j;
@@ -214,7 +214,7 @@ int bi_set_by_string(bigint **x, const int sign, const char *str, int base) {
     return ret;
 }
 
-void bi_refine(bigint *x) {
+void bi_refine(STRUCT_BIGINT *x) {
 
     if (x == NULL) {
         return;
@@ -237,7 +237,7 @@ void bi_refine(bigint *x) {
     }
 }
 
-void bi_assign(bigint **y, const bigint *x) {   // y <- x
+void bi_assign(STRUCT_BIGINT **y, const STRUCT_BIGINT *x) {   // y <- x
 
     if ( *y != NULL ) {
         bi_delete(y);
@@ -248,7 +248,7 @@ void bi_assign(bigint **y, const bigint *x) {   // y <- x
     (*y)->sign = x->sign;
 }
 
-void bi_gen_rand(bigint **x, const int sign, const size_t wordlen) {
+void bi_gen_rand(STRUCT_BIGINT **x, const int sign, const size_t wordlen) {
     
     bi_new(x, wordlen);
     array_rand((*x)->a, wordlen);
@@ -257,7 +257,7 @@ void bi_gen_rand(bigint **x, const int sign, const size_t wordlen) {
     bi_refine(*x);
 }
 
-void bi_set_one(bigint **x) {
+void bi_set_one(STRUCT_BIGINT **x) {
 
     if (*x != NULL) {
         bi_delete(x);
@@ -268,7 +268,7 @@ void bi_set_one(bigint **x) {
     (*x)->sign = NON_NEGATIVE;
 }
 
-void bi_set_zero(bigint **x) {
+void bi_set_zero(STRUCT_BIGINT **x) {
 
     if (*x != NULL) {
         bi_delete(x);
@@ -279,14 +279,14 @@ void bi_set_zero(bigint **x) {
     (*x)->sign = NON_NEGATIVE;
 }
 
-void bi_set_zero_not_refine(bigint **x) {
+void bi_set_zero_not_refine(STRUCT_BIGINT **x) {
 
     if ( *x == NULL || (*x)->a == NULL )
         return;
     memset((*x)->a, 0, WORD_BYTES * (*x)->wordlen);
 }
 
-int bi_is_zero(const bigint* x) {
+int bi_is_zero(const STRUCT_BIGINT* x) {
     int ret = FALSE;
     size_t j;
 
@@ -304,7 +304,7 @@ int bi_is_zero(const bigint* x) {
     return ret;
 }
 
-int bi_is_one(const bigint* x) {
+int bi_is_one(const STRUCT_BIGINT* x) {
     int ret = FALSE;
     size_t j;
 
@@ -352,7 +352,7 @@ int word_compare(word *x, word *y, size_t x_wordlen, size_t y_wordlen) {
     compare(x, y) = -1 (x < y)
     or FAIL
 */
-int bi_compare(const bigint *x, const bigint *y) {
+int bi_compare(const STRUCT_BIGINT *x, const STRUCT_BIGINT *y) {
     int ret;
 
     /* case exception */
@@ -390,7 +390,7 @@ int bi_compare(const bigint *x, const bigint *y) {
     compareabs(x, y) =  0 (x = y)
     or FAIL
 */
-int bi_compare_abs(const bigint *x, const bigint *y) {
+int bi_compare_abs(const STRUCT_BIGINT *x, const STRUCT_BIGINT *y) {
     size_t j, x_wordlen = x->wordlen, y_wordlen = y->wordlen;
     
     if (x_wordlen > y_wordlen) {   // x > y
@@ -413,12 +413,12 @@ int bi_compare_abs(const bigint *x, const bigint *y) {
     return 0;   // x == y
 }
 
-// int bi_shift_left(bigint **x, size_t r) {
+// int bi_shift_left(STRUCT_BIGINT **x, size_t r) {
 //     size_t n = (*x)->wordlen;
 //     size_t w = (size_t)(sizeof(word) * 8);
 //     size_t k, j;
 //     int rp;
-//     bigint *y = NULL;
+//     STRUCT_BIGINT *y = NULL;
 
 //     // case r == wk
 //     // x <- x << r (= x << wk)
@@ -472,12 +472,12 @@ int bi_compare_abs(const bigint *x, const bigint *y) {
 //     return -1;
 // }
 
-int bi_shift_left(bigint** x, size_t r) {
+int bi_shift_left(STRUCT_BIGINT** x, size_t r) {
     size_t n = (*x)->wordlen;
     size_t w = (size_t)(sizeof(word) * 8);
     size_t k;
     int rp;
-    bigint* y = NULL;
+    STRUCT_BIGINT* y = NULL;
 
     // case r == wk
     // x <- x << r (= x << wk)
@@ -527,7 +527,7 @@ int bi_shift_left(bigint** x, size_t r) {
 
 
 /* r: shift bits */
-int bi_shift_right(bigint **x, int r) {
+int bi_shift_right(STRUCT_BIGINT **x, int r) {
     if (r < 0) {
         bi_shift_left(x, (-1)*r);
         return 1;
@@ -608,8 +608,8 @@ int bi_shift_right(bigint **x, int r) {
     return -1;
 }
 
-/* bigint, reduction bits */
-int bi_reduction(bigint **x, size_t r) {
+/* STRUCT_BIGINT, reduction bits */
+int bi_reduction(STRUCT_BIGINT **x, size_t r) {
     int rp;
     size_t k, j,
            w = (size_t)(sizeof(word) * 8),      // 32
@@ -677,7 +677,7 @@ int bi_add_zj(word *zj, word xj, word yj, int c) {
     z <- x + y
     wordlen(x) >= wordlen(y)
 */
-int bi_add_zxy(bigint **z, const bigint *x, const bigint *y) {
+int bi_add_zxy(STRUCT_BIGINT **z, const STRUCT_BIGINT *x, const STRUCT_BIGINT *y) {
     int c;
     size_t j,
            n = x->wordlen,
@@ -685,7 +685,7 @@ int bi_add_zxy(bigint **z, const bigint *x, const bigint *y) {
 
     bi_new(z, n+1);
 
-    bigint *y_expand = NULL;    // copy of y
+    STRUCT_BIGINT *y_expand = NULL;    // copy of y
     if (n == m) {
         bi_assign(&y_expand, y);
     }
@@ -719,8 +719,8 @@ int bi_add_zxy(bigint **z, const bigint *x, const bigint *y) {
      input: x, y \in Z
      output: z = x + y \in Z
 */
-int bi_add(bigint **z, const bigint *x, const bigint *y) {
-    bigint *x_abs = NULL, 
+int bi_add(STRUCT_BIGINT **z, const STRUCT_BIGINT *x, const STRUCT_BIGINT *y) {
+    STRUCT_BIGINT *x_abs = NULL, 
            *y_abs = NULL;
 
     /* case x = 0 */
@@ -779,7 +779,7 @@ int bi_sub_zj(word *zj, word xj, word yj, int b) {
     z <- x + y
     always x >= y > 0
 */
-int bi_sub_zxy(bigint **z, const bigint *x, const bigint *y) {
+int bi_sub_zxy(STRUCT_BIGINT **z, const STRUCT_BIGINT *x, const STRUCT_BIGINT *y) {
 
     int b;
     size_t j, 
@@ -787,7 +787,7 @@ int bi_sub_zxy(bigint **z, const bigint *x, const bigint *y) {
            m = y->wordlen;      // n >= m
     
     bi_new(z, n);
-    bigint *y_expand = NULL;    // copy of y
+    STRUCT_BIGINT *y_expand = NULL;    // copy of y
     if (n == m) {
         bi_assign(&y_expand, y);
     }
@@ -818,9 +818,9 @@ int bi_sub_zxy(bigint **z, const bigint *x, const bigint *y) {
     Subtraction of two integers
      z <- x - y
 */
-int bi_sub(bigint **z, const bigint *x, const bigint *y) {
+int bi_sub(STRUCT_BIGINT **z, const STRUCT_BIGINT *x, const STRUCT_BIGINT *y) {
     int cmp;
-    bigint *x_temp = NULL,
+    STRUCT_BIGINT *x_temp = NULL,
            *y_temp = NULL;
 
     /* case x is zero */
@@ -908,7 +908,7 @@ int bi_sub(bigint **z, const bigint *x, const bigint *y) {
     Multiplication of two integers
      z <- x * y
 */
-int bi_mul(bigint **z, const bigint *x, const bigint *y, const char *str) {
+int bi_mul(STRUCT_BIGINT **z, const STRUCT_BIGINT *x, const STRUCT_BIGINT *y, const char *str) {
     /* Case x or y is zero */
     if ( bi_is_zero(x) == TRUE || bi_is_zero(y) == TRUE ) {
         bi_set_zero(z);
@@ -926,7 +926,7 @@ int bi_mul(bigint **z, const bigint *x, const bigint *y, const char *str) {
         return SUCCESS;
     }
     /* Case x is minus one */
-    bigint *temp = NULL;
+    STRUCT_BIGINT *temp = NULL;
     bi_assign(&temp, x);
     bi_sign_flip(temp);
     if (bi_is_one(temp) == TRUE) {
@@ -953,7 +953,7 @@ int bi_mul(bigint **z, const bigint *x, const bigint *y, const char *str) {
         Case else
          z <- x * y
     */
-    bigint *x_ = NULL,
+    STRUCT_BIGINT *x_ = NULL,
            *y_ = NULL;
     bi_assign(&x_, x);
     bi_assign(&y_, y);
@@ -1012,9 +1012,9 @@ int bi_mul_zj(word *zj, word xj, word yj) {
 
 /*
     Textbook Multiplication core code
-     bigint z <- bigint x * bigint y
+     STRUCT_BIGINT z <- STRUCT_BIGINT x * STRUCT_BIGINT y
 */
-int bi_mul_text_zxy(bigint **z, const bigint *x, const bigint *y) {
+int bi_mul_text_zxy(STRUCT_BIGINT **z, const STRUCT_BIGINT *x, const STRUCT_BIGINT *y) {
     if (x->sign == NEGATIVE || y->sign == NEGATIVE) {
         printf("Fatal Error: Textbook multiplication input value should be NON NEGATIVE\n");
         return FAIL;
@@ -1023,7 +1023,7 @@ int bi_mul_text_zxy(bigint **z, const bigint *x, const bigint *y) {
     size_t i, j,
            n = x->wordlen, 
            m = y->wordlen;
-    bigint *c = NULL, 
+    STRUCT_BIGINT *c = NULL, 
            *t = NULL;
 
     bi_new(&c, n+m);        // consider 5.1. Memory for mul
@@ -1049,7 +1049,7 @@ int bi_mul_text_zxy(bigint **z, const bigint *x, const bigint *y) {
     Karatsuba Multiplication core code
      z <- |x| * |y|
 */
-int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t flag) {
+int bi_mul_karatsuba_zxy(STRUCT_BIGINT **z, const STRUCT_BIGINT *x, const STRUCT_BIGINT *y, size_t flag) {
     if (x->sign == NEGATIVE || y->sign == NEGATIVE) {
         printf("Fatal Error: Karatsuba multiplication input value should be NON NEGATIVE\n");
         return FAIL;
@@ -1059,7 +1059,7 @@ int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t fl
     size_t l, lw, 
            n = x->wordlen, 
            m = y->wordlen;
-    bigint *a1 = NULL, *a0 = NULL, 
+    STRUCT_BIGINT *a1 = NULL, *a0 = NULL, 
            *b1 = NULL, *b0 = NULL, 
            *t1 = NULL, *t0 = NULL, 
            *c  = NULL, *c_ = NULL, 
@@ -1174,7 +1174,7 @@ int bi_mul_karatsuba_zxy(bigint **z, const bigint *x, const bigint *y, size_t fl
      input : X1·W + X0, Y
      output: Q
 */
-int bi_2word_div(word *q, const bigint *x, const word *y) {
+int bi_2word_div(word *q, const STRUCT_BIGINT *x, const word *y) {
     if (q == NULL || x == NULL || y == NULL) {
         return FALSE;
     }
@@ -1208,13 +1208,13 @@ int bi_2word_div(word *q, const bigint *x, const word *y) {
      input : Xn-1·W^{n-1} + Xn-2·W^{n-2} + ··· + X0, Ym-1·W^{m-1} + Ym-2·W^{m-2} + ··· + Y0
      output: Q, R
 */
-int bi_divcc(bigint **q, bigint **r, const bigint *x, const bigint *y) {
+int bi_divcc(STRUCT_BIGINT **q, STRUCT_BIGINT **r, const STRUCT_BIGINT *x, const STRUCT_BIGINT *y) {
     if (x == NULL || y == NULL) {       // Check input
         return FALSE;
     }
     
     size_t  n = x->wordlen, m = y->wordlen;
-    bigint *a = NULL, *t = NULL;
+    STRUCT_BIGINT *a = NULL, *t = NULL;
 
     bi_new(q, 1);
 
@@ -1272,7 +1272,7 @@ int bi_divcc(bigint **q, bigint **r, const bigint *x, const bigint *y) {
      if wordlen(X) is in {wordlen(Y), wordlen(Y) + 1}
       else return Q = 0, R = X
 */
-int bi_divc(bigint **q, bigint **r, const bigint *x, const bigint *y) {
+int bi_divc(STRUCT_BIGINT **q, STRUCT_BIGINT **r, const STRUCT_BIGINT *x, const STRUCT_BIGINT *y) {
     if (x == NULL || y == NULL) {       // Check input
         return FALSE;
     }
@@ -1291,7 +1291,7 @@ int bi_divc(bigint **q, bigint **r, const bigint *x, const bigint *y) {
 
     word    w = (word) 1 << (WORD_BITS - 1);
     size_t  m = y->wordlen;
-    bigint *a = NULL, *b  = NULL;
+    STRUCT_BIGINT *a = NULL, *b  = NULL;
 
     /* 
         Compute k (k >= 0) such that 2^{WORD-1} <= (2^k · Ym-1) < 2^{WORD}
@@ -1334,7 +1334,7 @@ int bi_divc(bigint **q, bigint **r, const bigint *x, const bigint *y) {
      input : Xn-1·W^{n-1} + Xn-2·W^{n-2} + ··· + X0, Ym-1·W^{m-1} + Ym-2·W^{m-2} + ··· + Y0
      output: Q, R such that X = YQ + R
 */
-int bi_div(bigint** q, bigint** r, const bigint* x, const bigint* y) {
+int bi_div(STRUCT_BIGINT** q, STRUCT_BIGINT** r, const STRUCT_BIGINT* x, const STRUCT_BIGINT* y) {
     if (x == NULL || y == NULL) {       // Check input
         return FAIL;
     }
@@ -1357,7 +1357,7 @@ int bi_div(bigint** q, bigint** r, const bigint* x, const bigint* y) {
     }
 
     size_t i, n = x->wordlen;
-    bigint* _q = NULL, * _r1 = NULL, * _r2 = NULL;
+    STRUCT_BIGINT* _q = NULL, * _r1 = NULL, * _r2 = NULL;
 
     bi_new(q, x->wordlen);
     bi_set_zero(&_r1);
@@ -1387,9 +1387,9 @@ int bi_div(bigint** q, bigint** r, const bigint* x, const bigint* y) {
         //x가 음수라면
         
         //q <- -q-1 
-        bigint* buf = NULL;
+        STRUCT_BIGINT* buf = NULL;
         (*q)->sign = NEGATIVE;
-        bigint* one = NULL;
+        STRUCT_BIGINT* one = NULL;
         bi_set_one(&one);
         bi_sub(&buf, (*q), one);
         bi_assign(q, buf);
@@ -1422,7 +1422,7 @@ int bi_div(bigint** q, bigint** r, const bigint* x, const bigint* y) {
      N is in [W^{n-1}, W^n) fixed n-word
      r <- x mod m
 */
-int bi_barrett_reduction(bigint **r, const bigint *x, const bigint *m, const bigint *t) {
+int bi_barrett_reduction(STRUCT_BIGINT **r, const STRUCT_BIGINT *x, const STRUCT_BIGINT *m, const STRUCT_BIGINT *t) {
 
     if (x == NULL || m == NULL || t == NULL) {
         return FAIL;
@@ -1434,7 +1434,7 @@ int bi_barrett_reduction(bigint **r, const bigint *x, const bigint *m, const big
         return FAIL;
     }
 
-    bigint *r_ = NULL, 
+    STRUCT_BIGINT *r_ = NULL, 
            *qh = NULL, 
            *x_ = NULL;
 
@@ -1462,7 +1462,7 @@ int bi_barrett_reduction(bigint **r, const bigint *x, const bigint *m, const big
 
 //내가 추가한 함수 -> 메모리 배열은 realloc을 이용해서 재할당 해주는 함수
 //x를 *형태로 구현해도 상관x
-int bi_realloc(bigint** const x, size_t size)
+int bi_realloc(STRUCT_BIGINT** const x, size_t size)
 {
     word* new_x = (word*)realloc((*x)->a, sizeof(word) * (size));
     if (new_x == NULL) {
@@ -1474,11 +1474,11 @@ int bi_realloc(bigint** const x, size_t size)
     return SUCCESS;
 }
 
-int bi_mul_itext_zxy(bigint** z, const bigint* x, const bigint* y) {
+int bi_mul_itext_zxy(STRUCT_BIGINT** z, const STRUCT_BIGINT* x, const STRUCT_BIGINT* y) {
     //11.13 - 수정사항에서 추가된 변수
-    bigint* new_x = NULL;
+    STRUCT_BIGINT* new_x = NULL;
     bi_assign(&new_x, x);
-    bigint* new_y = NULL;
+    STRUCT_BIGINT* new_y = NULL;
     bi_assign(&new_y, y);
 
     
@@ -1505,16 +1505,16 @@ int bi_mul_itext_zxy(bigint** z, const bigint* x, const bigint* y) {
     //아래 안쪽 for loop에서 필요하지만 -> 해당 위치에 bi_new를 쓰면 불필요한 bi_new 반복 호출 -> 비효율
     //그래서 아래 위치에 bi_new를 이용해서 T0,T1을 할당 해놓고 계속 재활용 할 예정!
 
-    bigint* T0 = NULL;
+    STRUCT_BIGINT* T0 = NULL;
     bi_new(&T0, 2 * n);
-    bigint* T1 = NULL;
+    STRUCT_BIGINT* T1 = NULL;
     bi_new(&T1, (2 * n) + 1);
 
     //Z = Z + T
     //과정에서 사용할 버퍼 변수 C 생성
-    bigint* C = NULL;
+    STRUCT_BIGINT* C = NULL;
     bi_set_zero(&C);
-    bigint* T = NULL;
+    STRUCT_BIGINT* T = NULL;
 
     word T0_MV[2] = { 0, };
     word T1_MV[2] = { 0, };
@@ -1559,9 +1559,11 @@ int bi_mul_itext_zxy(bigint** z, const bigint* x, const bigint* y) {
 
 //Modular Exponential by Montgomery Ladder
 //z <- (x ^ n) mod M
-int bi_montgomery_mod_exp(bigint** z, const bigint* x, const bigint* n, const bigint* M) {
+int bi_montgomery_mod_exp(STRUCT_BIGINT** z, const STRUCT_BIGINT* x, STRUCT_BIGINT* n, STRUCT_BIGINT* M) {
     //아래 연산시작 전 예외처리3개 + n이 0일때 따로 처리하는 부분
     //순서 중요!
+
+   
 
     //예외처리!
     //n은 양의 정수여야 함! 
@@ -1590,14 +1592,10 @@ int bi_montgomery_mod_exp(bigint** z, const bigint* x, const bigint* n, const bi
         }
     }
 
-    //예외처리
-    //(00000..000) (......)....(.....) -> 이런식으로 n의 word 배열의 가장 큰 part에 0이 패딩되어 있는 경우는
-    //n의 제로패딩된 부분을 없애서 인자로 넣어달라고 하는 부분 
-    size_t msw_idx = n->wordlen - 1;
-    if (n->a[msw_idx] == 0) {
-        printf("please reset n!\n");
-        return FAIL;
-    }
+    //(00000..000) (......)....(.....) -> 이런식으로 n의 word 배열의 가장 큰 part에 0이 패딩되어 있는 경우에
+    //연산이 들어가면 잘못된 연산이 진행이 됨
+    //그러한 오류를 방지하기 위해서 refine 과정 해주고 연산 들어감!
+    bi_refine(n);
     
     
 
@@ -1612,7 +1610,7 @@ int bi_montgomery_mod_exp(bigint** z, const bigint* x, const bigint* n, const bi
     //n의 워드배열 중 최상위 파트에서 어디서부터 1인지 찾아내는 부분
     //즉, n->a[n->wordlen-1]부분에서 어디서부터 비트가 1로 시작하는지를 알아내야
     //Modular Exponential by montgomery ladder 연산을 시작 할 수 있음
-    uint64_t mp = WORD_BITS - 1;//n의 워드배열 중 최상위 파트에서 최초로 1이 나타나는 인덱스
+    int mp = WORD_BITS - 1;//n의 워드배열 중 최상위 파트에서 최초로 1이 나타나는 인덱스
     int i, j;
     for (i = WORD_BITS - 1; i >= 0; i--) {
         if (((n->a[n->wordlen - 1] >> i) & 0x01) == 0) {
@@ -1627,18 +1625,18 @@ int bi_montgomery_mod_exp(bigint** z, const bigint* x, const bigint* n, const bi
     //Modular Exponential by Montgomery Ladder 연산 시작
 
     //T0,T1 초기화
-    bigint* T0 = NULL;
-    bigint* T1 = NULL;
+    STRUCT_BIGINT* T0 = NULL;
+    STRUCT_BIGINT* T1 = NULL;
     bi_set_one(&T0);
     bi_assign(&T1, x);
 
     //T0,T1 중간 결과값 담아놓을 버퍼
     //이 값을 T0,T1에 넣어서 T0,T1 계속 UPDATE
-    bigint* T = NULL;
+    STRUCT_BIGINT* T = NULL;
 
     //bi_div()의 인자에 넣어줄 Q,R -> 이 중 R만 사용해서 MOD연산 진행
-    bigint* Q = NULL;
-    bigint* R = NULL;
+    STRUCT_BIGINT* Q = NULL;
+    STRUCT_BIGINT* R = NULL;
 
     //n의 워드배열의 각 비트자리가 0 or 1?
     int ni = 0;
@@ -1650,22 +1648,31 @@ int bi_montgomery_mod_exp(bigint** z, const bigint* x, const bigint* n, const bi
             //T1 계산
             bi_mul(&T, T0, T1, "Karatsuba");
             bi_div(&Q, &R, T, M);
+            // printf("here1?\n");
             bi_assign(&T1, R);
 
             //T0 계산
             bi_mul(&T, T0, T0, "Karatsuba");//나중에 SQUARING으로 교체할 예정
             bi_div(&Q, &R, T, M);
+            // printf("here2?\n");
             bi_assign(&T0, R);
         }
         else {//ni==1
             //T0 계산
             bi_mul(&T, T0, T1, "Karatsuba");
             bi_div(&Q, &R, T, M);
+            // printf("here3?\n");
             bi_assign(&T0, R);
 
             //T1 계산
             bi_mul(&T, T1, T1, "Karatsuba");//나중에 SQUARING으로 교체할 예정
-            bi_div(&Q, &R, T, M);
+            // printf("T:"); bi_show_hex(T);
+            // printf("M:");bi_show_hex(M);
+
+            bi_refine(T);
+            bi_refine(M);
+            bi_div(&Q, &R, T, M);//여기서 못 빠져나오네..
+            // printf("here4?\n");
             bi_assign(&T1, R);
         }
     }
@@ -1708,6 +1715,147 @@ int bi_montgomery_mod_exp(bigint** z, const bigint* x, const bigint* n, const bi
     bi_delete(&T1);
     bi_delete(&Q);
     bi_delete(&R);
+
+    return SUCCESS;
+}
+
+
+
+//Textbook Squaring code
+//STRUCT_BIGINT z <- STRUCT_BIGINT x ^ 2
+int bi_squaring_text_zx(STRUCT_BIGINT** z, const STRUCT_BIGINT* x) {
+    //연산에 필요한 기본 변수들 세팅
+    size_t i, j;
+    size_t t = x->wordlen;
+
+    STRUCT_BIGINT* C1 = NULL;
+    STRUCT_BIGINT* C2 = NULL;
+    bi_set_zero(&C1);
+    bi_set_zero(&C2);
+
+    STRUCT_BIGINT* T1 = NULL;
+    STRUCT_BIGINT* T2 = NULL;
+
+    STRUCT_BIGINT* buf1 = NULL;//C1 <- T1 + C1에서 쓸 중간 값 버퍼
+    STRUCT_BIGINT* buf2 = NULL;//C2 <- ADD(C2,T2)에서 쓸 중간 값 버퍼
+
+
+    //1word buffer
+    STRUCT_BIGINT* sw1 = NULL;
+    STRUCT_BIGINT* sw2 = NULL;
+    bi_new(&sw1, 1);
+    bi_new(&sw2, 1);
+
+    STRUCT_BIGINT* sw3 = NULL;
+    bi_new(&sw3, 1);
+
+    //연산 시작
+    for (j = 0; j < t; j++) {
+        sw3->a[0] = x->a[j];
+        bi_mul(&T1, sw3, sw3, "Improved Text");
+
+        size_t len1 = (size_t)(2 * j * WORD_BITS);
+        bi_shift_left(&T1, len1);
+
+        bi_add(&buf1, T1, C1);
+        bi_assign(&C1, buf1);
+
+        for (i = j + 1; i < t; i++) {
+            sw1->a[0] = x->a[i];
+            sw2->a[0] = x->a[j];
+            bi_mul(&T2, sw1, sw2, "Improved Text");
+
+            size_t len2 = (size_t)((i + j) * WORD_BITS);
+            bi_shift_left(&T2, len2);
+
+            bi_add(&buf2, T2, C2);
+            bi_assign(&C2, buf2);
+        }
+    }
+
+    bi_shift_left(&C2, 1);
+    bi_add(z, C1, C2);
+
+    //refine & memory leak 관리
+    bi_refine(*z);
+    bi_delete(&C1);
+    bi_delete(&C2);
+    bi_delete(&T1);
+    bi_delete(&T2);
+    bi_delete(&buf1);
+    bi_delete(&buf2);
+    bi_delete(&sw1);
+    bi_delete(&sw2);
+    bi_delete(&sw3);
+
+
+    return SUCCESS;
+}
+
+//squaring karatsuba version
+int bi_squaring_karatsuba_zxy(STRUCT_BIGINT** z, const STRUCT_BIGINT* x, size_t flag) {
+    STRUCT_BIGINT* a1 = NULL;
+    STRUCT_BIGINT* a0 = NULL;
+    STRUCT_BIGINT* t0 = NULL;
+    STRUCT_BIGINT* t1 = NULL;
+    STRUCT_BIGINT* r_ = NULL;
+    STRUCT_BIGINT* r = NULL;
+    STRUCT_BIGINT* s = NULL;
+
+
+    //x의 길이가 flag보다 작으면 textbook squaring이 처리
+    if (flag >= x->wordlen) {
+        return bi_squaring_text_zx(z, x);
+    }
+
+    size_t l = (size_t)((x->wordlen + 1) >> 1);
+    size_t lw = l * WORD_BITS;
+
+    //|x| >> lw
+    bi_assign(&a1, x);
+    a1->sign = NON_NEGATIVE;
+    bi_shift_right(&a1, lw);
+
+    //|x| mod 2^lw
+    bi_set_by_array(&a0, NON_NEGATIVE, x->a, l);
+    bi_refine(a0);
+
+    //recursion part
+    bi_squaring_karatsuba_zxy(&t1, a1, flag);
+    bi_squaring_karatsuba_zxy(&t0, a0, flag);
+
+    //r <- (t1 << 2lw) + t0
+    bi_assign(&r_, t1);
+    bi_shift_left(&r_, 2 * lw);
+    bi_add(&r, r_, t0);
+
+    //s <- a1 * a0 
+    bi_mul_karatsuba_zxy(&s, a1, a0, 2);
+
+    //s <- s << (lw + 1)
+    bi_shift_left(&s, lw + 1);
+
+    //z <- r + s
+    bi_add(z, r, s);
+
+    //memory leak 관리
+    bi_delete(&a1);
+    bi_delete(&a0);
+    bi_delete(&t0);
+    bi_delete(&t1);
+    bi_delete(&r_);
+    bi_delete(&r);
+    bi_delete(&s);
+    return SUCCESS;
+}
+
+int bi_squaring(STRUCT_BIGINT** z, const STRUCT_BIGINT* x){
+    if (bi_is_zero(x) == TRUE || bi_is_one(x) == TRUE) {
+        bi_assign(z, x);
+    }
+    else {
+        bi_squaring_karatsuba_zxy(z, x, 2);
+    }
 
     return SUCCESS;
 }

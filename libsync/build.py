@@ -1,6 +1,8 @@
 import os
 import subprocess
 
+api: bool
+
 src_path     = "."
 include_path = ["./include"]
 test_src     = "test.c"
@@ -13,7 +15,6 @@ gcc_flags = ["-O2", "-Wall"]
 
 gpp       = ["g++"]
 gpp_flags = ["-std=c++11", "-O2", "-Wall"]
-
 
 def find_files(dir: str, ext: str) -> list:
     ret = []
@@ -34,18 +35,24 @@ def rm_files(files: list):
 
 
 def cbuild():
-    srcs     = find_files(src_path, ".c")
-    includes = []
-    succ     = []
+    c_srcs    = find_files(src_path, ".c")
+    cpp_srcs  = find_files(src_path, ".cpp")
+    includes  = []
+    succ      = []
 
-    if not srcs:
+    if not c_srcs:
         print("[!] The target to build does not exist.")
         return
+    
+    if api is True:
+        if not c_srcs:
+            print("[!] The target to build does not exist.")
+            return
     
     for path in include_path:
         includes += ["-I", path]
     
-    for src in srcs:
+    for src in c_srcs:
         out  = os.path.basename(src).split(".c")[0] + ".o"
         make = gcc + gcc_flags + includes + ["-c", src, "-o"] + [out]
 
@@ -56,6 +63,19 @@ def cbuild():
             print("[!] build failed.")
             rm_files(succ)
             return
+        
+    if api is True:
+        for src in cpp_srcs:
+            out  = os.path.basename(src).split(".cpp")[0] + ".o"
+            make = gpp + gpp_flags + includes + ["-c", src, "-o"] + [out]
+
+            try:
+                subprocess.check_call(make)
+                succ += [out]
+            except subprocess.CalledProcessError:
+                print("[!] build failed.")
+                rm_files(succ)
+                return
     
     try:
         subprocess.run(f"ar rcs lib{out_name}.a %s" % " ".join(succ), check=True, shell=True)
@@ -96,9 +116,10 @@ def ctest():
 
 message_run = '''
  
- 1. Build Sources
- 2. Test Library
- 3. Quit
+ 1. Build
+ 2. Build with API (upto: C++11) 
+ 3. Test Library
+ 4. Quit
 
 '''
 
@@ -108,8 +129,12 @@ if __name__ == "__main__":
         n = int(input("Enter a number: "))
         
         if   n == 1:
+            api = False
             cbuild()
         elif n == 2:
+            api = True
+            cbuild()
+        elif n == 3:
             ctest()
         else:
             break

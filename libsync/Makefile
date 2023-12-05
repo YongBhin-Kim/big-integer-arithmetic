@@ -4,9 +4,11 @@ LDFLAGS = -g
 SRCDIR  = .
 INCLUDEDIRS = ./include
 
-SOURCES  = array.c bigint.c
-SOURCES += test.c
+LIBSOURCES = array.c bigint.c
+LIBOBJECTS = $(LIBSOURCES:.c=.o)
+LIBRARY = libsync.a
 
+SOURCES = test.c
 OBJECTS = $(SOURCES:.c=.o)
 EXECUTABLE = test
 
@@ -14,11 +16,14 @@ EXECUTABLE = test
 
 all: $(EXECUTABLE)
 
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $^
+$(EXECUTABLE): $(LIBRARY) $(OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $^ -L. -lsync
+
+$(LIBRARY): $(LIBOBJECTS)
+	ar rcs $@ $^
 
 %.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) $(foreach dir,$(INCLUDEDIRS),-I$(dir)) -c -o $@ $<
 
 clean:
-	rm -f $(EXECUTABLE) $(OBJECTS)
+	rm -f $(EXECUTABLE) $(LIBRARY) $(OBJECTS) $(LIBOBJECTS)

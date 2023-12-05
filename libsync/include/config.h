@@ -10,6 +10,13 @@
 #define WORD      8
 
 /**
+ * @details
+ *  The structure name of big-integer-arithmetic
+*/
+
+#define STRUCT_BIGINT     c_bigint
+
+/**
  * @details 
  *  Initializes the value to zero when memory is released.
  *   0 : deactivate
