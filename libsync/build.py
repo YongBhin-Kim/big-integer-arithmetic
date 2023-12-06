@@ -56,11 +56,14 @@ def cbuild():
         out  = os.path.basename(src).split(".c")[0] + ".o"
         make = gcc + gcc_flags + includes + ["-c", src, "-o"] + [out]
 
+        print( f" {src} > {out}", end="")
+
         try:
             subprocess.check_call(make)
+            print("\t[O] Success.")
             succ += [out]
         except subprocess.CalledProcessError:
-            print("[!] build failed.")
+            print("\t[X] Failed.")
             rm_files(succ)
             return
         
@@ -69,18 +72,22 @@ def cbuild():
             out  = os.path.basename(src).split(".cpp")[0] + ".o"
             make = gpp + gpp_flags + includes + ["-c", src, "-o"] + [out]
 
+            print(f" {src} > {out}", end="")
+
             try:
                 subprocess.check_call(make)
+                print("\t[O] Success.")
                 succ += [out]
             except subprocess.CalledProcessError:
-                print("[!] build failed.")
+                print("\t[!] Failed.")
                 rm_files(succ)
                 return
     
     try:
         subprocess.run(f"ar rcs lib{out_name}.a %s" % " ".join(succ), check=True, shell=True)
+        print(" Library build has been successfully completed.")
     except subprocess.CalledProcessError:
-        print("[!] build failed.")
+        print(" Library build has failed.")
         rm_files(succ)
         return
     
@@ -104,7 +111,6 @@ def ctest():
         return
     
     try:
-        # subprocess.run("./test", check=True, shell=True)
         subprocess.run("./test > test.py; python3 test.py", check=True, shell=True)
         succ += ["test.py"]
     except subprocess.CalledProcessError:
@@ -116,23 +122,26 @@ def ctest():
 
 
 message_run = '''
- 
+ ===============
+ = BBQ Libsync =
+ ===============
  1. Build
  2. Build with API (upto: C++11) 
  3. Test Library
  4. Quit
-
 '''
 
 if __name__ == "__main__":
     while (1):
         print(message_run)
-        n = int(input("Enter a number: "))
+        n = int(input(" Enter a number: "))
         
         if   n == 1:
+            print("\n Build...")
             api = False
             cbuild()
         elif n == 2:
+            print("\n Build...")
             api = True
             cbuild()
         elif n == 3:

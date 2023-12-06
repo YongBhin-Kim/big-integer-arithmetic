@@ -1,5 +1,3 @@
-#include <time.h>
-
 #include "bigint.h"
 
 int string_is_hex(const char *str) {
@@ -899,7 +897,7 @@ int bi_mul(STRUCT_BIGINT **z, const STRUCT_BIGINT *x, const STRUCT_BIGINT *y, co
         bi_mul_itext_zxy(z, x, y);
     }
     else if (!strcmp("Karatsuba", str)) {
-        if (bi_mul_karatsuba_zxy(z, x_, y_, 2) == FAIL) {
+        if (bi_mul_karatsuba_zxy(z, x_, y_, KARATSUBA) == FAIL) {
             bi_delete(&x_);
             bi_delete(&y_);
             return FAIL;

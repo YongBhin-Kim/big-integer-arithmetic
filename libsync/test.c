@@ -4,8 +4,8 @@
 
 #include "bigint.h"
 
-#define BIGINT_SIZE      10
-#define TEST_EPOCH     1000
+#define BIGINT_SIZE       32
+#define TEST_EPOCH      1000
 
 #define PRINT(x)        { printf(#x " = "); bi_show_hex(x); }
 #define START_PYTHON(x) { printf("print("");print(\"%s\\n - iteration: %d\\n - size: %d\")\n", (x), TEST_EPOCH, BIGINT_SIZE); printf("ret = 0\n"); }

@@ -34,6 +34,14 @@
 
 #define DEBUG_OUT  0
 
+/**
+ * @details
+ *  The flag of Karatsuba multiplication
+ *   Recommand: 128 in 8bits, 64 in 32bits and 64bits
+*/
+
+#define KARATSUBA  64
+
 
 /**
  * @details
