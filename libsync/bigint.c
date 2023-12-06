@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "bigint.h"
 
 int string_is_hex(const char *str) {
@@ -45,11 +47,6 @@ void bi_delete(STRUCT_BIGINT **x) {
 #if ZERORIZE
     array_init((*x)->a, (*x)->wordlen);
 #endif
-
-    // free((*x)->a);
-    // (*x)->a = NULL;
-    // free(*x);
-    // *x = NULL;
 
     if ( (*x)->a != NULL ) {
         free((*x)->a);
@@ -413,65 +410,6 @@ int bi_compare_abs(const STRUCT_BIGINT *x, const STRUCT_BIGINT *y) {
     return 0;   // x == y
 }
 
-// int bi_shift_left(STRUCT_BIGINT **x, size_t r) {
-//     size_t n = (*x)->wordlen;
-//     size_t w = (size_t)(sizeof(word) * 8);
-//     size_t k, j;
-//     int rp;
-//     STRUCT_BIGINT *y = NULL;
-
-//     // case r == wk
-//     // x <- x << r (= x << wk)
-//     if ( r%w == 0 ) {
-//         k = r/w; 
-
-//         // y <- x, new allocate k-words
-//         bi_new(&y, n + k);
-//         y->sign = (*x)->sign;
-//         array_copy(y->a+k, (*x)->a, (*x)->wordlen);
-
-//         // x <- y
-//         bi_assign(x, y);
-//         bi_delete(&y);
-
-//         return 1;
-//     }
-//     // case r = wk + r' where 0 < r' < w
-//     else {
-//         k = r/w;
-//         rp = r%w;
-// #if 0
-//         printf("k = %d, rp = %d\n", k, rp);
-// #endif
-
-//         bi_new(&y, n + k + 1);
-//         y->sign = (*x)->sign;
-
-//         j = k;
-//         y->a[j] = ((*x)->a[j-k] << (rp)) & WORD_MASK;
-//         j++;
-//         for ( ; j<n+k+1; j++ ) {
-//             y->a[j] = ((((*x)->a[j-k] << rp) & WORD_MASK)) | ((*x)->a[j-k-1] >> (WORD_BITS-rp));
-//         }
-//         // j = k;
-//         // // 부호 확장
-//         // y->a[j] = (((*x)->a[j - k] << rp) & WORD_MASK) | (((*x)->a[j - k] & MSB_MASK) ? MSB_MASK << (WORD_BITS - rp) : 0);
-//         // j++;
-//         // for (; j < n + k + 1; j++) {
-//         //     y->a[j] = ((((*x)->a[j - k] << rp) & WORD_MASK)) | ((*x)->a[j - k - 1] >> (WORD_BITS - rp));
-//         // }
-
-//         // x <- y
-//         bi_assign(x, y);
-//         bi_refine(*x);
-//         bi_delete(&y);
-
-//         return 1;
-//     }
-
-//     return -1;
-// }
-
 int bi_shift_left(STRUCT_BIGINT** x, size_t r) {
     size_t n = (*x)->wordlen;
     size_t w = (size_t)(sizeof(word) * 8);
@@ -499,9 +437,6 @@ int bi_shift_left(STRUCT_BIGINT** x, size_t r) {
     else {
         k = r / w;
         rp = r % w;
-#if 0
-        printf("k = %d, rp = %d\n", k, rp);
-#endif
 
         bi_new(&y, n + k + 1);
         y->sign = (*x)->sign;
@@ -575,22 +510,15 @@ int bi_shift_right(STRUCT_BIGINT **x, int r) {
         for (; j < n; j++) {
             (*x)->a[j] = 0;
         }
-#if DEBUG_OUT
-        printf("before refine, x = "); bi_show_hex(*x);
-#endif
         bi_refine(*x); // 함수 안에서 wordlen = n-k 까지 처리
-#if DEBUG_OUT
-        printf("before refine, x = "); bi_show_hex(*x);
-#endif
+
         return 1;
     }
     /* case r = wk + r' where 0 < r' < w */
     else {
         k  = r / w;
         rp = r % w;
-#if DEBUG_OUT
-        printf(" k = %d, rp = %d\n", k, rp);
-#endif
+
         for (j = 0; j < n-k-1; j++) {
             (*x)->a[j] = ((*x)->a[j+k+1] << (WORD_BITS-rp)) | ((*x)->a[j+k] >> rp);
         }
@@ -1380,7 +1308,6 @@ int bi_div(STRUCT_BIGINT** q, STRUCT_BIGINT** r, const STRUCT_BIGINT* x, const S
         }
 
         bi_assign(&_r1, _r2);       // Update R0
-        bi_show_hex(_r1);
         (*q)->a[i - 1] = _q->a[0];    // Q = Qn-1·W^{n-1} + Qn-2·W^{n-2} + ··· + Q0
     }
 

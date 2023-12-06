@@ -104,6 +104,7 @@ def ctest():
         return
     
     try:
+        # subprocess.run("./test", check=True, shell=True)
         subprocess.run("./test > test.py; python3 test.py", check=True, shell=True)
         succ += ["test.py"]
     except subprocess.CalledProcessError:
