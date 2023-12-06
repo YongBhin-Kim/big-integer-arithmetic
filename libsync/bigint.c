@@ -75,7 +75,7 @@ void bi_new(STRUCT_BIGINT **x, const size_t wordlen) {
 }
 
 void bi_show_hex(const STRUCT_BIGINT *x) {
-    int i;
+    size_t i;
 
     if (x->wordlen == 0) {
         return;
@@ -94,6 +94,7 @@ void bi_show_hex(const STRUCT_BIGINT *x) {
     for (i = x->wordlen; i-- > 1;) {
         printf(HEX_FORMAT, x->a[i]);
     }
+
     /* print last word */
     printf(HEX_FORMAT, x->a[i]);
     printf("\n");

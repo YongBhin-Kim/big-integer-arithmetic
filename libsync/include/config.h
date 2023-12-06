@@ -17,6 +17,14 @@
 #define STRUCT_BIGINT     c_bigint
 
 /**
+ * @details
+ *  The flag of Karatsuba multiplication
+ *   set the appropriate value according to the word size of the frequently used big-integer.
+*/
+
+#define KARATSUBA  12
+
+/**
  * @details 
  *  Initializes the value to zero when memory is released.
  *   0 : deactivate
@@ -33,15 +41,6 @@
 */
 
 #define DEBUG_OUT  0
-
-/**
- * @details
- *  The flag of Karatsuba multiplication
- *   Recommand: 128 in 8bits, 64 in 32bits and 64bits
-*/
-
-#define KARATSUBA  64
-
 
 /**
  * @details

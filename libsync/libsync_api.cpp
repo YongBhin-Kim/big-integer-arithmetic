@@ -38,6 +38,16 @@ std::ostream &operator<<(std::ostream &out, const bigint &bigint_) {
     return out;
 }
 
+std::istream &operator>>(std::istream &in, bigint &bigint_) {
+    std::string str_hex;
+    
+    in >> str_hex;
+    bigint temp = str_hex.c_str();
+    bi_assign(&bigint_.a, temp.a);
+
+    return in;
+}
+
 bigint bigint::operator+(const bigint &other) const {
     bigint ret;
     
@@ -231,43 +241,3 @@ bool bigint::operator<=(const bigint &other) const {
     }
     return true;
 }
-
-// int main(void) {
-//     bigint::set_mul_algo("Karatsuba");
-
-//     bigint a = "0x12";
-//     bigint b = "0x10";
-//     bigint c = "0xff";
-
-//     std::cout << "1. " << a + b;
-//     std::cout << "2. " << a - b;
-//     std::cout << "3. " << a * b;
-//     std::cout << "4. " << a / b;
-//     std::cout << "5. " << a % b;
-//     std::cout << "6. " << (b << 3);
-//     std::cout << "7. " << (b >> 1);
-    
-//     a += "0x35";    std::cout << "8. " << a;
-//     a -= "0x35";    std::cout << "9. " << a;
-//     a *= "0x35";    std::cout << "10. " << a;
-//     a /= "0x35";    std::cout << "11. " << a;
-//     a %= "0x12";    std::cout << "12. " << a;
-
-//     c.square();     std::cout << "13. " << c;
-//     b.power("0xa881", "0xff");
-//     std::cout << "14. " << b;
-
-//     if (c > a) {
-//         std::cout << "15. " << "c > a\n";
-//     }
-
-//     if (c >= a) {
-//         std::cout << "16. " << "c >= a\n";
-//     }
-
-//     if (c != a) {
-//         std::cout << "17. " << "c != a\n";
-//     }
-
-//     return 0;
-// }

@@ -6,7 +6,7 @@ api: bool
 src_path     = "."
 include_path = ["./include"]
 test_src     = "test.c"
-except_srcs  = [test_src, ""]
+except_srcs  = [test_src, "calc.cpp", ""]
 
 out_name     = "sync"
 

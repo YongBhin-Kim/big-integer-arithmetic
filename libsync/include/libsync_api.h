@@ -27,6 +27,7 @@ class bigint {
         void power(bigint n, bigint M);
 
         friend std::ostream &operator<<(std::ostream &out, const bigint &bigint_);
+        friend std::istream &operator>>(std::istream &in, bigint &bigint_);
 
         bigint operator+(const bigint &other) const;
         bigint operator-(const bigint &other) const;
