@@ -22,7 +22,7 @@ typedef struct {
 
 // void bi_delete(pbigint *x);
 
-
+int bi_set_min_words(STRUCT_BIGINT **x, size_t n);
 /*************************************************************************************
  * Big integer operation - Basic operation
 **************************************************************************************/
@@ -32,7 +32,7 @@ void bi_new(STRUCT_BIGINT **x, const size_t wordlen);
 void bi_show_hex(const STRUCT_BIGINT *x);
 // void bi_show_dec(const STRUCT_BIGINT *x);
 void bi_show_bin(const STRUCT_BIGINT *x);
-void bi_set_min_words(STRUCT_BIGINT **x, const int sign, const size_t wordlen);
+// void bi_set_min_words(STRUCT_BIGINT **x, const int sign, const size_t wordlen);
 void bi_set_by_array(STRUCT_BIGINT **x, const int sign, const word *a, const size_t wordlen);
 int bi_set_by_string(STRUCT_BIGINT **x, const int sign, const char *str, int base);
 void bi_refine(STRUCT_BIGINT *x);

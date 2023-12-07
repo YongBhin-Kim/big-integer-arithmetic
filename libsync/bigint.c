@@ -18,6 +18,14 @@ int string_is_hex(const char *str) {
     return TRUE;
 }
 
+// W^2n
+int bi_set_min_words(STRUCT_BIGINT **x, size_t n) {
+    bi_new(x, 2*n+1);
+    (*x)->a[2*n] = 1;
+    (*x)->sign = NON_NEGATIVE;
+    return 1;
+}
+
 int string_is_bin(const char *str) {
     long long pos = -1;
     long long   n = strlen(str);

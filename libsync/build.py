@@ -91,7 +91,7 @@ def cbuild():
         rm_files(succ)
         return
     
-    rm_files(succ)
+    # rm_files(succ)
 
 
 def ctest():

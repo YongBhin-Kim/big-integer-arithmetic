@@ -4,7 +4,10 @@
 
 #include "bigint.h"
 
-#define BIGINT_SIZE       32
+#define BIGINT_SIZE       16
+// #define BIGINT_SIZE       32
+// #define BIGINT_SIZE       16
+// #define BIGINT_SIZE       8
 #define TEST_EPOCH      1000
 
 #define PRINT(x)        { printf(#x " = "); bi_show_hex(x); }
@@ -203,6 +206,42 @@ void test_mul_karatsuba() {
     free_bigint(3, &z, &x, &y);
 }
 
+void test_barrett_reduction() {
+    int i;
+    long start;
+    double elapsed = 0;
+    c_bigint *r = NULL, *a = NULL, *n = NULL, *t = NULL, *q = NULL, *r_ = NULL, *x = NULL, *y = NULL, *m = NULL;
+    // m = W^2n
+    START_PYTHON("bi_barrett_reduction - barrett reduction...");
+    for (i = 0; i < TEST_EPOCH; i++) {
+        get_rand_bigint(9, 1, &a);
+        get_rand_bigint(5, 1, &n);
+        
+        bi_refine(a);
+        bi_refine(n);
+
+        start = get_ns();
+        bi_set_min_words(&m, 5);
+        bi_div(&t, &r_, m, n);
+        bi_barrett_reduction(&r, a, n, t);
+        elapsed += (get_ns() - start);
+
+        /*
+            Python Format
+        */
+        PRINT(a);
+        PRINT(n);
+        PRINT(t);
+        PRINT(r);
+        printf("if a %% n == r:\n\tret = ret + 1\n");
+        // printf("else:\n\tprint(a);print(n);print(t);print(r)\n");
+    }
+    END_PYTHON(elapsed / TEST_EPOCH / 1000000);
+
+    free_bigint(4, &a, &n, &t, &r);
+    free_bigint(4, &q, &r_, &x, &y);
+}
+
 void test_left() {
     int i;
     long start;
@@ -357,11 +396,12 @@ int main() {
     test_mul_textbook();
     test_mul_improved_text();
     test_mul_karatsuba();
+    test_barrett_reduction();
 
-    test_div();
-    test_modular_expo();
     test_text_squaring();
     test_karatsuba_squaring();
+    test_div();
+    test_modular_expo();
 
     return 0;
 } 
